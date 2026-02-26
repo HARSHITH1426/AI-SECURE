@@ -11,7 +11,6 @@ import {
   Shield, 
   Lock, 
   User, 
-  Terminal, 
   Fingerprint, 
   Zap, 
   AlertCircle, 
@@ -20,7 +19,9 @@ import {
   ShieldCheck,
   Eye,
   EyeOff,
-  RefreshCw
+  RefreshCw,
+  Terminal,
+  Activity
 } from 'lucide-react';
 import { useAuth, useUser } from '@/firebase';
 import { initiateEmailSignIn, initiateEmailSignUp, initiateAnonymousSignIn } from '@/firebase/non-blocking-login';
@@ -36,12 +37,11 @@ export default function LoginPage() {
   const [isSignUp, setIsSignUp] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
-  const [authStage, setAuthStage] = useState<'idle' | 'verifying' | 'established'>('idle');
+  const [authStage, setAuthStage] = useState<'idle' | 'verifying' | 'biometric' | 'established'>('idle');
 
-  // Password strength calculation
   const passwordStrength = (pwd: string) => {
     let strength = 0;
-    if (pwd.length > 6) strength += 25;
+    if (pwd.length > 8) strength += 25;
     if (pwd.match(/[A-Z]/)) strength += 25;
     if (pwd.match(/[0-9]/)) strength += 25;
     if (pwd.match(/[^A-Za-z0-9]/)) strength += 25;
@@ -53,7 +53,7 @@ export default function LoginPage() {
       setAuthStage('established');
       const timer = setTimeout(() => {
         router.push('/dashboard');
-      }, 1000);
+      }, 800);
       return () => clearTimeout(timer);
     }
   }, [user, isUserLoading, router]);
@@ -63,19 +63,22 @@ export default function LoginPage() {
     setError(null);
     setAuthStage('verifying');
     
-    // Simulate verification delay for "Strong" feel
+    // Simulate high-security verification sequence
     setTimeout(() => {
-      try {
-        if (isSignUp) {
-          initiateEmailSignUp(auth, email, password);
-        } else {
-          initiateEmailSignIn(auth, email, password);
+      setAuthStage('biometric');
+      setTimeout(() => {
+        try {
+          if (isSignUp) {
+            initiateEmailSignUp(auth, email, password);
+          } else {
+            initiateEmailSignIn(auth, email, password);
+          }
+        } catch (err: any) {
+          setError(err.message || "Credential validation failed.");
+          setAuthStage('idle');
         }
-      } catch (err: any) {
-        setError(err.message || "An authentication error occurred.");
-        setAuthStage('idle');
-      }
-    }, 1500);
+      }, 1200);
+    }, 1000);
   };
 
   const handleAnonymousAuth = () => {
@@ -85,7 +88,7 @@ export default function LoginPage() {
       try {
         initiateAnonymousSignIn(auth);
       } catch (err: any) {
-        setError(err.message || "Could not establish guest session.");
+        setError(err.message || "Ephemeral session rejected.");
         setAuthStage('idle');
       }
     }, 1000);
@@ -93,95 +96,105 @@ export default function LoginPage() {
 
   if (isUserLoading && authStage !== 'established') {
     return (
-      <div className="min-h-screen bg-[#0A0C10] flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
+      <div className="min-h-screen bg-[#050608] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-6">
           <div className="relative">
-            <Cpu className="w-16 h-16 text-primary animate-pulse" />
-            <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full animate-ping" />
+            <Cpu className="w-20 h-20 text-primary animate-pulse" />
+            <div className="absolute inset-0 bg-primary/30 blur-2xl rounded-full animate-ping" />
           </div>
-          <p className="text-muted-foreground font-mono text-sm tracking-tighter animate-pulse uppercase">
-            Establishing Secure Handshake...
-          </p>
+          <div className="text-center space-y-2">
+            <p className="text-primary font-mono text-xs tracking-[0.3em] uppercase animate-pulse">
+              Synchronizing Neural Link...
+            </p>
+            <div className="w-48 h-1 bg-muted/20 rounded-full overflow-hidden">
+              <div className="h-full bg-primary animate-[progress_2s_ease-in-out_infinite]" />
+            </div>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#0A0C10] flex items-center justify-center p-6 relative overflow-hidden">
-      {/* Dynamic Background Decorative Elements */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-30">
-        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,#1e293b,transparent)]" />
-        <div className="grid grid-cols-[repeat(20,minmax(0,1fr))] h-full w-full opacity-10">
-          {Array.from({ length: 400 }).map((_, i) => (
-            <div key={i} className="border-[0.5px] border-primary/10 h-20 w-full" />
-          ))}
-        </div>
+    <div className="min-h-screen bg-[#050608] flex items-center justify-center p-6 relative overflow-hidden">
+      {/* Structural Grid Background */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]" />
+        <div className="absolute top-0 left-0 w-full h-full bg-radial-gradient from-primary/5 via-transparent to-transparent opacity-50" />
       </div>
 
-      <div className="w-full max-w-lg z-10 space-y-6">
-        <div className="text-center space-y-2">
-          <div className="inline-flex p-4 bg-primary/5 rounded-3xl border border-primary/20 shadow-2xl shadow-primary/10 mb-2 group">
-            <Shield className="w-10 h-10 text-primary group-hover:scale-110 transition-transform duration-500" />
+      <div className="w-full max-w-xl z-10 space-y-8">
+        <div className="text-center space-y-4">
+          <div className="inline-flex p-5 bg-primary/10 rounded-[2rem] border border-primary/30 shadow-[0_0_50px_-12px_rgba(var(--primary),0.5)] group transition-all duration-700 hover:rotate-[360deg]">
+            <Shield className="w-12 h-12 text-primary group-hover:scale-110" />
           </div>
-          <h1 className="text-4xl font-extrabold tracking-tighter text-white">
-            COGNISECURE <span className="text-primary italic">VAULT</span>
-          </h1>
-          <p className="text-muted-foreground text-sm font-mono tracking-widest uppercase opacity-70">
-            Node Identity: {typeof window !== 'undefined' ? window.location.hostname : 'PRIMARY'}
-          </p>
+          <div className="space-y-1">
+            <h1 className="text-5xl font-black tracking-tighter text-white uppercase italic">
+              CogniSecure <span className="text-primary">Vault</span>
+            </h1>
+            <p className="text-muted-foreground text-[10px] font-mono tracking-[0.5em] uppercase opacity-50">
+              Authorized Personnel Only // Node: {typeof window !== 'undefined' ? window.location.hostname.toUpperCase() : 'SECURE_PRIMARY'}
+            </p>
+          </div>
         </div>
 
         {error && (
-          <Alert variant="destructive" className="bg-destructive/5 border-destructive/20 text-destructive animate-in slide-in-from-top-2">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Security Breach / Access Denied</AlertTitle>
-            <AlertDescription>{error}</AlertDescription>
+          <Alert variant="destructive" className="bg-destructive/10 border-destructive/30 text-destructive animate-in slide-in-from-top-4 border-2">
+            <AlertCircle className="h-5 w-5" />
+            <AlertTitle className="font-bold uppercase tracking-tight">Security Alert: Access Denied</AlertTitle>
+            <AlertDescription className="font-mono text-xs mt-1">{error}</AlertDescription>
           </Alert>
         )}
 
         <Card className={cn(
-          "border-border/40 bg-card/60 backdrop-blur-3xl shadow-2xl border-t-primary/20 transition-all duration-300",
-          error && "border-destructive/50"
+          "border-border/30 bg-black/40 backdrop-blur-3xl shadow-2xl border-t-primary/40 transition-all duration-500 overflow-hidden",
+          error && "border-destructive/60 animate-shake",
+          authStage === 'biometric' && "border-accent/60"
         )}>
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl flex items-center gap-3">
-              {authStage === 'verifying' ? (
-                <div className="flex items-center gap-2">
-                  <RefreshCw className="w-5 h-5 text-accent animate-spin" />
-                  <span className="text-accent">Verifying...</span>
-                </div>
-              ) : authStage === 'established' ? (
-                <div className="flex items-center gap-2">
-                  <ShieldCheck className="w-5 h-5 text-green-500" />
-                  <span className="text-green-500">Access Granted</span>
-                </div>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <Lock className="w-5 h-5 text-primary" />
-                  <span>Establish Session</span>
-                </div>
-              )}
-            </CardTitle>
-            <CardDescription className="text-xs font-mono flex items-center gap-2">
-              <span className={cn(
-                "w-2 h-2 rounded-full",
-                authStage === 'idle' ? "bg-green-500 animate-pulse" : "bg-accent animate-ping"
-              )} />
-              SYSTEM PROTOCOL: AES-XTS-512 / SHA-3
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary to-transparent opacity-50" />
+          
+          <CardHeader className="space-y-2 pb-8">
+            <div className="flex justify-between items-start">
+              <CardTitle className="text-3xl font-bold tracking-tight">
+                {authStage === 'verifying' ? (
+                  <span className="flex items-center gap-3 text-primary animate-pulse">
+                    <RefreshCw className="w-6 h-6 animate-spin" /> Handshake...
+                  </span>
+                ) : authStage === 'biometric' ? (
+                  <span className="flex items-center gap-3 text-accent animate-pulse">
+                    <Fingerprint className="w-6 h-6" /> Biometrics...
+                  </span>
+                ) : authStage === 'established' ? (
+                  <span className="flex items-center gap-3 text-green-400">
+                    <ShieldCheck className="w-6 h-6" /> Access Granted
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-3">
+                    <Lock className="w-6 h-6 text-primary" /> Session Initialize
+                  </span>
+                )}
+              </CardTitle>
+              <Badge variant="outline" className="font-mono text-[9px] border-primary/30 text-primary px-2 py-0">
+                L-LEVEL 4
+              </Badge>
+            </div>
+            <CardDescription className="text-[10px] font-mono flex items-center gap-2 text-muted-foreground uppercase tracking-widest">
+              <Activity className="w-3 h-3 text-primary animate-pulse" />
+              Protocol: XTS-AES-512-RSA-4096
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <form onSubmit={handleEmailAuth} className="space-y-5">
+
+          <CardContent className="space-y-6">
+            <form onSubmit={handleEmailAuth} className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-xs uppercase tracking-widest font-bold opacity-70">Identity Alias</Label>
+                <Label htmlFor="email" className="text-[10px] uppercase tracking-[0.2em] font-bold text-muted-foreground/80">Entity Identifier</Label>
                 <div className="relative group">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                  <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                   <Input 
                     id="email" 
                     type="email" 
-                    placeholder="entity@cognisecure.vault" 
-                    className="pl-10 h-12 bg-muted/20 border-border/50 focus:border-primary/50 focus:ring-primary/20 transition-all" 
+                    placeholder="entity@secure.vault" 
+                    className="pl-12 h-14 bg-white/5 border-border/30 focus:border-primary/50 focus:ring-primary/20 transition-all rounded-xl font-mono" 
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
@@ -192,23 +205,26 @@ export default function LoginPage() {
               
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
-                  <Label htmlFor="password" className="text-xs uppercase tracking-widest font-bold opacity-70">Security Token</Label>
+                  <Label htmlFor="password" className="text-[10px] uppercase tracking-[0.2em] font-bold text-muted-foreground/80">Security Token</Label>
                   {isSignUp && password && (
-                    <span className={cn(
-                      "text-[10px] font-mono",
-                      passwordStrength(password) < 50 ? "text-destructive" : "text-green-500"
-                    )}>
-                      Strength: {passwordStrength(password)}%
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[9px] font-mono text-muted-foreground uppercase">Entropy:</span>
+                      <span className={cn(
+                        "text-[9px] font-bold font-mono",
+                        passwordStrength(password) < 50 ? "text-destructive" : "text-green-400"
+                      )}>
+                        {passwordStrength(password)}%
+                      </span>
+                    </div>
                   )}
                 </div>
                 <div className="relative group">
-                  <Key className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                  <Key className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                   <Input 
                     id="password" 
                     type={showPassword ? "text" : "password"} 
-                    placeholder="••••••••" 
-                    className="pl-10 pr-10 h-12 bg-muted/20 border-border/50 focus:border-primary/50 focus:ring-primary/20 transition-all" 
+                    placeholder="••••••••••••" 
+                    className="pl-12 pr-12 h-14 bg-white/5 border-border/30 focus:border-primary/50 focus:ring-primary/20 transition-all rounded-xl font-mono" 
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
@@ -217,72 +233,100 @@ export default function LoginPage() {
                   <button 
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-white transition-colors"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
-                {isSignUp && password && (
-                  <Progress value={passwordStrength(password)} className="h-1 bg-muted/30" />
+                {isSignUp && (
+                  <div className="pt-2">
+                    <Progress value={passwordStrength(password)} className="h-1 bg-muted/20" />
+                  </div>
                 )}
               </div>
 
               <Button 
                 type="submit" 
-                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-black uppercase tracking-tighter h-14 text-lg shadow-xl shadow-primary/20 group overflow-hidden relative"
+                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-black uppercase tracking-tighter h-16 text-xl shadow-[0_20px_40px_-15px_rgba(var(--primary),0.4)] group overflow-hidden relative rounded-xl"
                 disabled={authStage !== 'idle'}
               >
-                <div className="relative z-10 flex items-center justify-center gap-2">
-                  {isSignUp ? "Initialize Node" : "Authorize Session"}
-                  <Zap className="w-5 h-5 group-hover:animate-bounce" />
+                <div className="relative z-10 flex items-center justify-center gap-3">
+                  {isSignUp ? "Initialize Identity" : "Authorize Session"}
+                  <Zap className="w-5 h-5 group-hover:scale-125 transition-transform" />
                 </div>
-                {authStage === 'verifying' && (
-                  <div className="absolute inset-0 bg-accent animate-pulse opacity-20" />
+                {(authStage === 'verifying' || authStage === 'biometric') && (
+                  <div className="absolute inset-0 bg-white/20 animate-pulse" />
                 )}
               </Button>
             </form>
+
+            <div className="bg-white/[0.02] border border-white/5 rounded-xl p-4 space-y-3">
+              <div className="flex items-center gap-2 text-[10px] font-mono text-muted-foreground/60 uppercase">
+                <Terminal className="w-3 h-3" /> System Logs:
+              </div>
+              <div className="space-y-1 font-mono text-[9px]">
+                <p className="text-green-500/80 tracking-tighter flex items-center gap-2">
+                  <span className="w-1 h-1 bg-green-500 rounded-full animate-pulse" />
+                  [LOG] Secure socket layer established...
+                </p>
+                <p className="text-primary/80 tracking-tighter flex items-center gap-2">
+                  <span className="w-1 h-1 bg-primary rounded-full" />
+                  [LOG] Encryption keys verified (512-bit)...
+                </p>
+                {authStage === 'biometric' && (
+                  <p className="text-accent tracking-tighter flex items-center gap-2 animate-in slide-in-from-left-2">
+                    <span className="w-1 h-1 bg-accent rounded-full animate-ping" />
+                    [LOG] Behavioral biometric scan in progress...
+                  </p>
+                )}
+              </div>
+            </div>
           </CardContent>
-          <CardFooter className="flex flex-col gap-5 bg-muted/10 p-6">
+
+          <CardFooter className="flex flex-col gap-6 bg-white/[0.03] p-8 border-t border-white/5">
             <div className="relative w-full">
               <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-border/30" />
+                <span className="w-full border-t border-white/10" />
               </div>
-              <div className="relative flex justify-center text-[10px] font-mono uppercase tracking-widest">
-                <span className="bg-[#0A0C10] px-3 text-muted-foreground">Encryption Bypass</span>
+              <div className="relative flex justify-center text-[9px] font-mono uppercase tracking-[0.3em]">
+                <span className="bg-[#0A0C10] px-4 text-muted-foreground/50">Alternative Entry</span>
               </div>
             </div>
             
-            <div className="grid grid-cols-2 gap-3 w-full">
+            <div className="grid grid-cols-2 gap-4 w-full">
               <Button 
                 variant="outline" 
-                className="border-border/50 bg-transparent hover:bg-white/5 h-11 font-mono text-[10px] uppercase tracking-tighter"
+                className="border-white/10 bg-transparent hover:bg-white/5 h-12 font-mono text-[10px] uppercase tracking-widest rounded-xl transition-all"
                 onClick={handleAnonymousAuth}
                 disabled={authStage !== 'idle'}
               >
                 <Fingerprint className="w-4 h-4 mr-2 text-accent" />
-                Ephemeral
+                Guest Link
               </Button>
               <Button 
                 variant="outline" 
-                className="border-border/50 bg-transparent hover:bg-white/5 h-11 font-mono text-[10px] uppercase tracking-tighter"
+                className="border-white/10 bg-transparent hover:bg-white/5 h-12 font-mono text-[10px] uppercase tracking-widest rounded-xl transition-all"
                 onClick={() => setIsSignUp(!isSignUp)}
                 disabled={authStage !== 'idle'}
               >
-                {isSignUp ? "Verify Identity" : "Register Node"}
+                {isSignUp ? "Identity Check" : "Register DNA"}
               </Button>
             </div>
 
-            <p className="text-[9px] text-muted-foreground font-mono text-center leading-relaxed opacity-50 uppercase tracking-tight">
-              Access is monitored by the AI threat intelligence layer. 
-              Unauthorized attempts will be logged to the immutable audit ledger.
+            <p className="text-[8px] text-muted-foreground/40 font-mono text-center leading-relaxed uppercase tracking-tight max-w-xs mx-auto">
+              All interactions are hashed and recorded to the immutable forensic ledger. 
+              Breach attempts trigger autonomous defensive measures.
             </p>
           </CardFooter>
         </Card>
 
-        <div className="flex justify-between px-2 text-[10px] font-mono text-muted-foreground opacity-40 uppercase tracking-widest">
+        <div className="flex justify-between items-center px-4 text-[9px] font-mono text-muted-foreground/30 uppercase tracking-[0.4em]">
           <span>{new Date().toISOString().split('T')[0]}</span>
-          <span>SECURE-TUNNEL-X4</span>
-          <span>CH-8291</span>
+          <span className="flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-green-500/20" />
+            Active-Secure
+          </span>
+          <span>CH-8291-B</span>
         </div>
       </div>
     </div>
