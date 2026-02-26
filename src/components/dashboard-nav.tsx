@@ -1,7 +1,10 @@
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { Shield, Lock, Database, History, Settings, User, AlertCircle, LayoutDashboard } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
+import { Shield, Lock, Database, History, Settings, User, AlertCircle, LayoutDashboard, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useAuth, useUser } from '@/firebase';
+import { signOut } from 'firebase/auth';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 const navItems = [
   { name: 'Security Posture', href: '/dashboard', icon: LayoutDashboard },
@@ -12,6 +15,14 @@ const navItems = [
 
 export function DashboardNav() {
   const pathname = usePathname();
+  const router = useRouter();
+  const auth = useAuth();
+  const { user } = useUser();
+
+  const handleSignOut = async () => {
+    await signOut(auth);
+    router.push('/');
+  };
 
   return (
     <div className="flex flex-col h-full bg-card border-r w-64 fixed left-0 top-0">
@@ -47,6 +58,21 @@ export function DashboardNav() {
       </div>
 
       <div className="mt-auto p-6 space-y-4">
+        {user && (
+          <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg border border-border/50">
+            <Avatar className="h-8 w-8 border border-primary/20">
+              <AvatarImage src={user.photoURL || undefined} />
+              <AvatarFallback className="bg-primary/10 text-primary text-[10px]">
+                {user.email?.substring(0, 2).toUpperCase() || 'AN'}
+              </AvatarFallback>
+            </Avatar>
+            <div className="overflow-hidden">
+              <p className="text-xs font-bold truncate">{user.displayName || 'Vault User'}</p>
+              <p className="text-[10px] text-muted-foreground truncate font-mono">{user.email || 'Guest Session'}</p>
+            </div>
+          </div>
+        )}
+
         <div className="bg-muted/50 p-4 rounded-xl border border-border/50">
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">System State</span>
@@ -64,10 +90,13 @@ export function DashboardNav() {
           </div>
         </div>
 
-        <div className="flex items-center gap-3 px-4 py-3 rounded-md text-muted-foreground hover:bg-muted transition-colors cursor-pointer">
-          <User className="w-4 h-4" />
-          <span className="text-sm font-medium">Admin Portal</span>
-        </div>
+        <button 
+          onClick={handleSignOut}
+          className="flex items-center gap-3 w-full px-4 py-3 rounded-md text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors cursor-pointer group"
+        >
+          <LogOut className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          <span className="text-sm font-medium">Terminate Session</span>
+        </button>
       </div>
     </div>
   );

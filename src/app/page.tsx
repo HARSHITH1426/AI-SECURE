@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Shield, Lock, Cpu, Globe } from 'lucide-react';
+import { Shield, Lock, Cpu, Globe, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export default function Home() {
@@ -27,11 +27,14 @@ export default function Home() {
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-          <Button asChild size="lg" className="h-14 px-10 text-lg bg-primary hover:bg-primary/90 rounded-full font-semibold">
-            <Link href="/dashboard">Access Secure Portal</Link>
+          <Button asChild size="lg" className="h-14 px-10 text-lg bg-primary hover:bg-primary/90 rounded-full font-semibold group">
+            <Link href="/login" className="flex items-center gap-2">
+              Access Secure Portal
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </Link>
           </Button>
-          <Button variant="outline" size="lg" className="h-14 px-10 text-lg border-white/10 hover:bg-white/5 rounded-full font-semibold">
-            System Documentation
+          <Button variant="outline" asChild size="lg" className="h-14 px-10 text-lg border-white/10 hover:bg-white/5 rounded-full font-semibold">
+            <Link href="/dashboard">Direct Telemetry</Link>
           </Button>
         </div>
 
