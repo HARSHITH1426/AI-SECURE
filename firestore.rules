@@ -1,0 +1,121 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * COGNISECURE VAULT SECURITY RULES
+     *
+     * CORE PHILOSOPHY:
+     * This ruleset implements a multi-layered security model centered on "Authorization Independence."
+     * We utilize a Sentinel Collection pattern (/admins) for high-privilege access, ensuring that
+     * administrative checks are performant and isolated from user profile data.
+     *
+     * DATA STRUCTURE:
+     * - /users/{userId}: Private user profiles secured by UID matching.
+     * - /roles/{roleId}: System-wide configuration for access levels, read-only for users.
+     * - /admins/{adminId}: A "Sentinel" collection where the presence of a UID grants global admin rights.
+     * - /authAttempts/{id}: Immutable security logs for auditing.
+     * - /sessions/{id}: User-specific session tracking with denormalized owner IDs.
+     *
+     * KEY SECURITY DECISIONS:
+     * 1. DBAC (Database Access Control): Admin status is determined by document existence in the /admins path,
+     *    avoiding complex and slow lookups in user documents.
+     * 2. Denormalization: Ownership fields (userId) are required on child documents (Sessions, AuthAttempts)
+     *    to allow for immediate authorization without traversing the document tree.
+     * 3. Immutability: Critical relational links, such as the owner of a session or the ID of a user,
+     *    are enforced as immutable during updates.
+     * 4. Prototyping Flexibility: While access is strictly controlled, specific data shapes (fields like
+     *    firstName, description, timestamps) are not validated to allow for rapid schema iteration.
+     */
+
+    // --- HELPER FUNCTIONS ---
+
+    /** Checks if the request is from an authenticated user. */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /** Checks if the authenticated user's UID matches the provided userId. */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    /** Checks if the user is a registered administrator via the Sentinel collection. */
+    function isAdmin() {
+      return isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    /** Verifies ownership based on a field within the document data. */
+    function isDataOwner(ownerId) {
+      return isSignedIn() && request.auth.uid == ownerId;
+    }
+
+    // --- COLLECTION RULES ---
+
+    /**
+     * @description Rules for user profiles. Users can manage their own profile; admins have full access.
+     * @path /users/{userId}
+     * @allow (get) If the user is the owner or an admin.
+     * @deny (update) If a user tries to change their internal 'id' field.
+     * @principle Enforces document ownership for writes and validates path-to-data consistency.
+     */
+    match /users/{userId} {
+      allow get, list: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) && request.resource.data.id == userId;
+      allow update: if (isOwner(userId) || isAdmin()) && resource != null && request.resource.data.id == resource.data.id;
+      allow delete: if isAdmin();
+    }
+
+    /**
+     * @description System roles configuration. Publicly readable by users to understand permissions.
+     * @path /roles/{roleId}
+     * @allow (get) Any signed-in user.
+     * @deny (create) Any non-admin user.
+     * @principle Global configuration data with restricted administrative writes.
+     */
+    match /roles/{roleId} {
+      allow get, list: if isSignedIn();
+      allow create, update, delete: if isAdmin();
+    }
+
+    /**
+     * @description Sentinel collection for admin privileges.
+     * @path /admins/{adminId}
+     * @allow (get) Only admins can verify other admins' status.
+     * @deny (list) Prevent users from enumerating the administrator list.
+     * @principle Existence-over-content for high-performance authorization.
+     */
+    match /admins/{adminId} {
+      allow get, list: if isAdmin();
+      allow create, update, delete: if isAdmin();
+    }
+
+    /**
+     * @description Logs of authentication attempts. Immutable audit trail.
+     * @path /authAttempts/{authAttemptId}
+     * @allow (list) Only admins for security monitoring.
+     * @deny (write) Direct client writes; intended for system/Cloud Function use only.
+     * @principle Restricted access to sensitive security logs.
+     */
+    match /authAttempts/{authAttemptId} {
+      allow get, list: if isAdmin();
+      allow create, update, delete: if false; // System logic handles this via Admin SDK
+    }
+
+    /**
+     * @description Active user sessions. Users manage their own sessions; admins monitor all.
+     * @path /sessions/{sessionId}
+     * @allow (create) If the userId field matches the authenticated user.
+     * @deny (update) If the userId field is modified to point to a different user.
+     * @principle Relational integrity via denormalized ownership fields.
+     */
+    match /sessions/{sessionId} {
+      allow get: if (resource != null && isDataOwner(resource.data.userId)) || isAdmin();
+      allow list: if isAdmin(); // Note: Users must use specific queries if listing is required
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow update: if resource != null && (isDataOwner(resource.data.userId) || isAdmin()) && request.resource.data.userId == resource.data.userId;
+      allow delete: if resource != null && (isDataOwner(resource.data.userId) || isAdmin());
+    }
+
+  }
+}

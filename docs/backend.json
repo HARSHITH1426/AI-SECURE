@@ -1,0 +1,280 @@
+{
+  "entities": {
+    "Role": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Role",
+      "type": "object",
+      "description": "Defines the different access levels and permissions within the CogniSecure Vault system.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Role entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the role (e.g., 'Admin', 'EndUser')."
+        },
+        "description": {
+          "type": "string",
+          "description": "A detailed description of the permissions and responsibilities associated with this role."
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description"
+      ]
+    },
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "type": "object",
+      "description": "Represents an individual user account within the CogniSecure Vault, including both end-users and administrators.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the User entity."
+        },
+        "username": {
+          "type": "string",
+          "description": "A unique username for the user, used for login."
+        },
+        "email": {
+          "type": "string",
+          "description": "The user's primary email address.",
+          "format": "email"
+        },
+        "firstName": {
+          "type": "string",
+          "description": "The first name of the user."
+        },
+        "lastName": {
+          "type": "string",
+          "description": "The last name of the user."
+        },
+        "roleId": {
+          "type": "string",
+          "description": "Reference to the Role entity, defining the user's access level. (Relationship: Role 1:N User)"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the user account was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the user account was last updated.",
+          "format": "date-time"
+        },
+        "lastLoginAt": {
+          "type": "string",
+          "description": "Timestamp indicating the user's last successful login.",
+          "format": "date-time"
+        },
+        "isEnabled": {
+          "type": "boolean",
+          "description": "Indicates whether the user account is currently enabled or disabled."
+        }
+      },
+      "required": [
+        "id",
+        "username",
+        "email",
+        "roleId",
+        "createdAt",
+        "isEnabled"
+      ]
+    },
+    "AuthAttempt": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "AuthAttempt",
+      "type": "object",
+      "description": "Records details of each login attempt, whether successful or failed, for security monitoring and analysis.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the AuthAttempt entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the User entity associated with this authentication attempt. (Relationship: User 1:N AuthAttempt)"
+        },
+        "attemptTimestamp": {
+          "type": "string",
+          "description": "Timestamp when the authentication attempt occurred.",
+          "format": "date-time"
+        },
+        "ipAddress": {
+          "type": "string",
+          "description": "The IP address from which the authentication attempt was made."
+        },
+        "userAgent": {
+          "type": "string",
+          "description": "The User-Agent string provided by the client's browser or application."
+        },
+        "isSuccessful": {
+          "type": "boolean",
+          "description": "Indicates whether the authentication attempt was successful."
+        },
+        "failureReason": {
+          "type": "string",
+          "description": "If the attempt failed, this field describes the reason for failure (e.g., 'invalid credentials', 'account locked')."
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "attemptTimestamp",
+        "ipAddress",
+        "isSuccessful"
+      ]
+    },
+    "Session": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Session",
+      "type": "object",
+      "description": "Tracks active user sessions, capturing details relevant for continuous authentication and session management.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Session entity, often corresponding to a session token."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the User entity whose session this is. (Relationship: User 1:N Session)"
+        },
+        "loginAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the session was initiated (user logged in).",
+          "format": "date-time"
+        },
+        "lastActivityAt": {
+          "type": "string",
+          "description": "Timestamp of the last recorded user activity within this session, used for inactivity timeouts.",
+          "format": "date-time"
+        },
+        "logoutAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the session was explicitly terminated (user logged out). Null if still active.",
+          "format": "date-time"
+        },
+        "ipAddress": {
+          "type": "string",
+          "description": "The IP address from which the session originated and is primarily active."
+        },
+        "userAgent": {
+          "type": "string",
+          "description": "The User-Agent string of the client device for this session."
+        },
+        "isActive": {
+          "type": "boolean",
+          "description": "Indicates whether the session is currently considered active."
+        },
+        "isExpired": {
+          "type": "boolean",
+          "description": "Indicates whether the session has expired due to inactivity or other policies."
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "loginAt",
+        "lastActivityAt",
+        "ipAddress",
+        "isActive",
+        "isExpired"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Stores individual user profiles, where 'userId' is the Firebase Authentication UID. Access is typically restricted to the owner of the profile and authorized administrators. Includes 'roleId' to link to their assigned system role.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique Firebase Authentication UID of the user."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/roles/{roleId}",
+        "definition": {
+          "entityName": "Role",
+          "schema": {
+            "$ref": "#/backend/entities/Role"
+          },
+          "description": "Defines the available system-wide roles (e.g., 'Admin', 'EndUser'). These documents are generally read-only for most users and primarily managed by a super-administrator.",
+          "params": [
+            {
+              "name": "roleId",
+              "description": "The unique identifier for a specific role."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/admins/{adminId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "A sentinel collection used for Database Access Control (DBAC). The existence of a document at this path (where 'adminId' is a user's UID) grants administrator privileges. This implements 'Existence over Content' and ensures authorization independence by allowing direct 'exists()' checks in security rules, minimizing security rule complexity and enhancing performance.",
+          "params": [
+            {
+              "name": "adminId",
+              "description": "The Firebase Authentication UID of a user designated as an administrator."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/authAttempts/{authAttemptId}",
+        "definition": {
+          "entityName": "AuthAttempt",
+          "schema": {
+            "$ref": "#/backend/entities/AuthAttempt"
+          },
+          "description": "Logs all authentication attempts, whether successful or failed, for security monitoring and auditing. Documents include 'userId' for direct ownership linking and are primarily readable by administrators only. Creation is handled by system/Cloud Functions following authentication events.",
+          "params": [
+            {
+              "name": "authAttemptId",
+              "description": "The unique identifier for an authentication attempt record."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/sessions/{sessionId}",
+        "definition": {
+          "entityName": "Session",
+          "schema": {
+            "$ref": "#/backend/entities/Session"
+          },
+          "description": "Tracks active user sessions, including 'userId' for explicit ownership. Users can read and update their own sessions (e.g., for 'lastActivityAt', 'logoutAt'), and administrators can access all sessions for monitoring. This design includes denormalized 'userId' for authorization independence and robust QAP enforcement.",
+          "params": [
+            {
+              "name": "sessionId",
+              "description": "The unique identifier for a user session."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore structure for CogniSecure Vault is designed with a strong emphasis on authorization independence, debuggability, and adherence to DBAC principles. It employs structural segregation and denormalization to simplify security rules and enhance query efficiency. \n\n**Authorization Independence via Denormalization:**\n1.  **User Roles (Admin Designation):** Instead of relying on a `roleId` directly within the `/users/{userId}` document for real-time, critical authorization checks (e.g., admin status), a dedicated collection `/admins/{adminId}` is introduced. Admin status is determined by the *existence* of a document at `/admins/{request.auth.uid}`. This eliminates the need for `get(/users/...)` calls in security rules to check for administrative privileges, making authorization checks atomic, faster, and significantly easier to debug. While a user's `roleId` is still stored in their `/users/{userId}` document for application logic and display, it is not the primary mechanism for security rule enforcement of high-privilege roles.\n2.  **Activity Logs & Sessions:** Documents in `/authAttempts/{authAttemptId}` and `/sessions/{sessionId}` collections explicitly include a `userId` field. This denormalizes the ownership context directly into each document, allowing security rules to verify ownership (`request.auth.uid == resource.data.userId`) without having to traverse parent documents. This is critical for supporting atomic operations (e.g., writing an `AuthAttempt` concurrently with updating a `User`'s `lastLoginAt`) and ensuring that a document's authorization context is self-contained.\n\n**Support for QAPs (Query as Policy):**\n1.  **Structural Segregation:** Collections are segregated based on their homogeneous security posture. For instance, `/authAttempts` is primarily admin-readable and system-writable, containing sensitive security logs. `/sessions` allows users to read and manage their own sessions, while also granting administrators broader access. This segregation ensures that all documents within a collection adhere to a consistent access pattern, simplifying rule logic. A user cannot accidentally query other users' authentication attempts because the rules enforce admin-only access or strict `userId` filtering for any list operation.\n2.  **Explicit `userId` for Filtering:** The inclusion of `userId` in `AuthAttempt` and `Session` documents enables rules to enforce query policies. For example, a rule for `/sessions` can mandate that a user listing documents *must* include `where('userId', '==', request.auth.uid)` in their query. This ensures users only retrieve their own sessions, making security rules not merely passive filters but active policies that validate the *intent* of the query against the available data attributes. Administrators, conversely, would have more permissive `list` permissions, potentially allowing them to query all documents in these collections."
+  }
+}
