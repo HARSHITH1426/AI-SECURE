@@ -32,24 +32,24 @@
   }
 
   .dark {
-    --background: 223 15% 12%;
+    --background: 223 15% 8%;
     --foreground: 223 15% 98%;
-    --card: 223 15% 15%;
+    --card: 223 15% 10%;
     --card-foreground: 223 15% 98%;
-    --popover: 223 15% 13%;
+    --popover: 223 15% 10%;
     --popover-foreground: 223 15% 98%;
     --primary: 220 70% 60%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 223 15% 20%;
+    --secondary: 223 15% 15%;
     --secondary-foreground: 223 15% 98%;
-    --muted: 223 15% 20%;
+    --muted: 223 15% 15%;
     --muted-foreground: 223 15% 70%;
     --accent: 190 85% 55%;
     --accent-foreground: 223 15% 10%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 223 15% 22%;
-    --input: 223 15% 22%;
+    --border: 223 15% 18%;
+    --input: 223 15% 18%;
     --ring: 220 70% 60%;
     --chart-1: 220 70% 60%;
     --chart-2: 190 85% 55%;
@@ -78,4 +78,26 @@
 
 .risk-gradient {
   background: linear-gradient(90deg, #2BCDEE 0%, #5281E0 50%, #f43f5e 100%);
+}
+
+@keyframes glitch {
+  0% { transform: translate(0) }
+  20% { transform: translate(-2px, 2px) }
+  40% { transform: translate(-2px, -2px) }
+  60% { transform: translate(2px, 2px) }
+  80% { transform: translate(2px, -2px) }
+  100% { transform: translate(0) }
+}
+
+.animate-glitch {
+  animation: glitch 0.3s cubic-bezier(.25,.46,.45,.94) both infinite;
+}
+
+@keyframes pulse-accent {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.05); }
+}
+
+.animate-pulse-accent {
+  animation: pulse-accent 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
