@@ -1,42 +1,42 @@
-# CogniSecure Vault
+# CogniSecure Vault // Node_V4
 
-A high-performance, self-evolving cryptographic data vault architecture built with Next.js, Firebase, and Genkit AI.
+A high-performance, self-evolving cryptographic data vault architecture built with Next.js 15, Firebase, and Genkit AI.
 
-## Overview
+## Technical Overview
 
-CogniSecure Vault is a specialized security platform designed for mission-critical data protection. It leverages a unique "Trust-Entropy" driven cryptographic model to provide adaptive security based on real-time risk assessment.
+CogniSecure Vault is a specialized security platform designed for mission-critical data protection. It leverages a unique "Trust-Entropy" driven cryptographic model to provide adaptive security based on real-time risk assessment and behavioral biometric verification.
 
-## Core Features
+## Core Architecture
 
 - **Adaptive Encryption**: Dynamic AES-256-GCM key rotation triggered by contextual entropy shifts.
-- **Continuous Behavioral Authentication**: Advanced monitoring of user interactions to detect session hijacking or unauthorized access.
+- **Continuous Behavioral Authentication**: Advanced monitoring of "neural-typing" patterns to detect session hijacking.
 - **Immutable Forensic Ledger**: Blockchain-verified audit trails for tamper-proof security logging.
-- **AI-Driven Threat Intelligence**: Integrated Genkit flows for automated log analysis and strategic security recommendations.
+- **Cognitive Threat Intelligence**: Integrated Genkit flows for automated forensic log analysis and strategic mitigation recommendations.
 
-## Tech Stack
+## Local Deployment Protocol
 
-- **Framework**: [Next.js 15+](https://nextjs.org/) (App Router)
-- **Styling**: [Tailwind CSS](https://tailwindcss.com/) & [Shadcn UI](https://ui.shadcn.com/)
-- **Backend/Auth**: [Firebase](https://firebase.google.com/) (Auth, Firestore)
-- **AI Intelligence**: [Genkit](https://github.com/firebase/genkit) (Gemini 1.5/2.0 Flash)
-- **Icons**: [Lucide React](https://lucide.dev/)
+To initialize a local instance of the vault, execute the following commands in the project root:
 
-## Architecture
+1. **Synchronize Environment**:
+   Ensure `.env` contains valid `FIREBASE_CONFIG` and `GOOGLE_GENAI_API_KEY` identifiers.
 
-The system is architected around the principle of "Authorization Independence," utilizing sentinel collections for administrative checks and denormalized data structures for high-performance security rule evaluation.
-
-## Getting Started
-
-1. **Environment Configuration**: Set up your `.env` with the necessary Firebase and Google AI credentials.
-2. **Development Server**:
+2. **Launch Secure Portal (Next.js)**:
    ```bash
    npm run dev
    ```
-3. **Genkit Console**:
+   Access the node interface at `http://localhost:9002`.
+
+3. **Initialize AI Security Layer (Genkit)**:
    ```bash
    npm run genkit:dev
    ```
+   This activates the forensic analysis engine for real-time threat evaluation.
 
 ## Security Disclosure
 
-This project implements experimental cryptographic patterns. Ensure all security rules are reviewed before production deployment.
+This project implements experimental cryptographic patterns. Ensure all security rules are reviewed and the sentinel admin collection is properly provisioned before any production-grade deployment.
+
+---
+**NODE_STATUS**: ACTIVE
+**PROTOCOL**: XTS-AES-512
+**ENCRYPTION**: VERIFIED
