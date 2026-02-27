@@ -5,20 +5,19 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Shield, Lock, AlertTriangle, Activity, Zap, Fingerprint, Eye } from 'lucide-react';
 import { currentSystemStats, mockThreats } from '@/lib/mock-data';
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from 'recharts';
 
-const riskHistory = [
-  { time: '00:00', score: 0.12 },
-  { time: '04:00', score: 0.08 },
-  { time: '08:00', score: 0.45 },
-  { time: '12:00', score: 0.22 },
-  { time: '16:00', score: 0.15 },
-  { time: '20:00', score: 0.38 },
-  { time: 'now', score: 0.25 },
+const RISK_TELEMETRY_DATA = [
+  { epoch: '00:00', riskFactor: 0.12 },
+  { epoch: '04:00', riskFactor: 0.08 },
+  { epoch: '08:00', riskFactor: 0.45 },
+  { epoch: '12:00', riskFactor: 0.22 },
+  { epoch: '16:00', riskFactor: 0.15 },
+  { epoch: '20:00', riskFactor: 0.38 },
+  { epoch: 'now', riskFactor: 0.25 },
 ];
 
-export default function DashboardPage() {
+export default function SecureTelemetryCenter() {
   return (
     <div className="space-y-8 animate-in fade-in duration-700">
       <div className="flex justify-between items-end">
@@ -35,33 +34,33 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatsCard 
-          title="Trust Score" 
-          value={`${currentSystemStats.trustScore}%`} 
-          description="Global System Integrity" 
-          icon={<Shield className="w-5 h-5 text-primary" />}
-          trend="+2.1% from last hour"
+        <GlobalMetricCard 
+          label="Trust Score" 
+          metric={`${currentSystemStats.trustScore}%`} 
+          subtext="Global System Integrity" 
+          visual={<Shield className="w-5 h-5 text-primary" />}
+          vector="+2.1% from last hour"
         />
-        <StatsCard 
-          title="Dynamic Entropy" 
-          value={currentSystemStats.entropyLevel} 
-          description="Information Density" 
-          icon={<Activity className="w-5 h-5 text-accent" />}
-          trend="Optimizing"
+        <GlobalMetricCard 
+          label="Dynamic Entropy" 
+          metric={currentSystemStats.entropyLevel} 
+          subtext="Information Density" 
+          visual={<Activity className="w-5 h-5 text-accent" />}
+          vector="Optimizing"
         />
-        <StatsCard 
-          title="Active Anomalies" 
-          value={currentSystemStats.activeThreats} 
-          description="Flagged Events" 
-          icon={<AlertTriangle className="w-5 h-5 text-destructive" />}
-          trend="None Critical"
+        <GlobalMetricCard 
+          label="Active Anomalies" 
+          metric={currentSystemStats.activeThreats} 
+          subtext="Flagged Events" 
+          visual={<AlertTriangle className="w-5 h-5 text-destructive" />}
+          vector="None Critical"
         />
-        <StatsCard 
-          title="Auth Certainty" 
-          value="99.4%" 
-          description="Continuous Behavioral" 
-          icon={<Fingerprint className="w-5 h-5 text-primary" />}
-          trend="Highly Reliable"
+        <GlobalMetricCard 
+          label="Auth Certainty" 
+          metric="99.4%" 
+          subtext="Continuous Behavioral" 
+          visual={<Fingerprint className="w-5 h-5 text-primary" />}
+          vector="Highly Reliable"
         />
       </div>
 
@@ -76,13 +75,13 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent className="h-[300px] pt-4">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={riskHistory}>
+              <LineChart data={RISK_TELEMETRY_DATA}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#333" />
-                <XAxis dataKey="time" stroke="#888" fontSize={12} />
+                <XAxis dataKey="epoch" stroke="#888" fontSize={12} />
                 <YAxis stroke="#888" fontSize={12} />
                 <Line 
                   type="monotone" 
-                  dataKey="score" 
+                  dataKey="riskFactor" 
                   stroke="hsl(var(--primary))" 
                   strokeWidth={3} 
                   dot={{ r: 4, fill: "hsl(var(--primary))", strokeWidth: 2 }}
@@ -103,10 +102,10 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {mockThreats.slice(0, 5).map((threat, i) => (
-                <div key={i} className="flex gap-3 text-sm p-3 rounded-lg bg-muted/30 border border-border/20">
+              {mockThreats.slice(0, 5).map((finding, index) => (
+                <div key={index} className="flex gap-3 text-sm p-3 rounded-lg bg-muted/30 border border-border/20">
                   <div className="w-1 h-auto bg-primary rounded-full shrink-0" />
-                  <p className="text-muted-foreground leading-snug">{threat}</p>
+                  <p className="text-muted-foreground leading-snug">{finding}</p>
                 </div>
               ))}
             </div>
@@ -177,23 +176,23 @@ export default function DashboardPage() {
   );
 }
 
-function StatsCard({ title, value, description, icon, trend }: { title: string, value: string | number, description: string, icon: React.ReactNode, trend?: string }) {
+function GlobalMetricCard({ label, metric, subtext, visual, vector }: { label: string, metric: string | number, subtext: string, visual: React.ReactNode, vector?: string }) {
   return (
     <Card className="border-border/50 bg-card/50 shadow-sm">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-          {title}
+          {label}
         </CardTitle>
-        {icon}
+        {visual}
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold">{value}</div>
+        <div className="text-2xl font-bold">{metric}</div>
         <p className="text-xs text-muted-foreground mt-1">
-          {description}
+          {subtext}
         </p>
-        {trend && (
+        {vector && (
           <div className="mt-3 text-[10px] font-mono text-primary flex items-center gap-1 uppercase">
-            <Activity className="w-3 h-3" /> {trend}
+            <Activity className="w-3 h-3" /> {vector}
           </div>
         )}
       </CardContent>
