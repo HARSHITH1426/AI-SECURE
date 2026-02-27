@@ -6,6 +6,9 @@ import { Toaster } from '@/components/ui/toaster';
 export const metadata: Metadata = {
   title: 'CogniSecure Vault | Trust-Entropy Cryptography',
   description: 'Self-Evolving Trust-Entropy Driven Cryptographic Architecture for AI-Based Secure Data Vault Systems',
+  icons: {
+    icon: 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%235281E0%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><path d=%22M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10%22/><circle cx=%2212%22 cy=%2212%22 r=%223%22/></svg>',
+  },
 };
 
 export default function RootLayout({

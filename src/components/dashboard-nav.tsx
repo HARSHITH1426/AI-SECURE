@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Shield, Lock, Database, History, Settings, User, AlertCircle, LayoutDashboard, LogOut } from 'lucide-react';
+import { Shield, Lock, Database, History, Settings, User, AlertCircle, LayoutDashboard, LogOut, Fingerprint } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth, useUser } from '@/firebase';
 import { signOut } from 'firebase/auth';
@@ -28,10 +28,11 @@ export function DashboardNav() {
     <div className="flex flex-col h-full bg-card border-r w-64 fixed left-0 top-0">
       <div className="p-6">
         <div className="flex items-center gap-2 mb-8">
-          <div className="bg-primary p-2 rounded-lg">
-            <Shield className="w-6 h-6 text-white" />
+          <div className="bg-primary p-2 rounded-lg relative overflow-hidden group">
+            <Shield className="w-6 h-6 text-white transition-transform group-hover:scale-110" />
+            <div className="absolute inset-0 bg-white/20 animate-pulse pointer-events-none" />
           </div>
-          <span className="font-bold text-xl tracking-tight text-foreground">CogniSecure</span>
+          <span className="font-bold text-xl tracking-tight text-foreground italic">Cogni<span className="text-primary">Secure</span></span>
         </div>
 
         <nav className="space-y-1">
