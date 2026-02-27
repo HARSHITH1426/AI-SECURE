@@ -24,7 +24,7 @@ To initialize a local instance of the vault, execute the following commands in t
    ```bash
    npm run dev
    ```
-   Access the node interface at `http://localhost:9002`.
+   Access the node interface at `http://localhost:9003`.
 
 3. **Initialize AI Security Layer (Genkit)**:
    ```bash
