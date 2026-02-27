@@ -22,7 +22,9 @@ import {
   EyeOff,
   RefreshCw,
   Terminal,
-  Activity
+  Activity,
+  Scan,
+  CheckCircle2
 } from 'lucide-react';
 import { useAuth, useUser } from '@/firebase';
 import { initiateEmailSignIn, initiateEmailSignUp } from '@/firebase/non-blocking-login';
@@ -38,7 +40,8 @@ export default function LoginPage() {
   const [isSignUp, setIsSignUp] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
-  const [authStage, setAuthStage] = useState<'idle' | 'verifying' | 'biometric' | 'established'>('idle');
+  const [authStage, setAuthStage] = useState<'idle' | 'verifying' | 'scanning' | 'biometric_verified' | 'established'>('idle');
+  const [scanProgress, setScanProgress] = useState(0);
 
   const passwordStrength = (pwd: string) => {
     let strength = 0;
@@ -59,26 +62,50 @@ export default function LoginPage() {
     }
   }, [user, isUserLoading, router]);
 
-  const handleEmailAuth = (e: React.FormEvent) => {
+  // Simulation of fingerprint scanning progress
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (authStage === 'scanning') {
+      interval = setInterval(() => {
+        setScanProgress((prev) => {
+          if (prev >= 100) {
+            clearInterval(interval);
+            setTimeout(() => setAuthStage('biometric_verified'), 500);
+            return 100;
+          }
+          return prev + 5;
+        });
+      }, 50);
+    } else if (authStage !== 'scanning') {
+      setScanProgress(0);
+    }
+    return () => clearInterval(interval);
+  }, [authStage]);
+
+  // Finalize authentication after biometric verification
+  useEffect(() => {
+    if (authStage === 'biometric_verified') {
+      try {
+        if (isSignUp) {
+          initiateEmailSignUp(auth, email, password);
+        } else {
+          initiateEmailSignIn(auth, email, password);
+        }
+      } catch (err: any) {
+        setError(err.message || "Credential validation failed.");
+        setAuthStage('idle');
+      }
+    }
+  }, [authStage, auth, email, password, isSignUp]);
+
+  const handleAuthInitiation = (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setAuthStage('verifying');
     
-    // Simulate high-security verification sequence
+    // Initial handshake simulation
     setTimeout(() => {
-      setAuthStage('biometric');
-      setTimeout(() => {
-        try {
-          if (isSignUp) {
-            initiateEmailSignUp(auth, email, password);
-          } else {
-            initiateEmailSignIn(auth, email, password);
-          }
-        } catch (err: any) {
-          setError(err.message || "Credential validation failed.");
-          setAuthStage('idle');
-        }
-      }, 1200);
+      setAuthStage('scanning');
     }, 1000);
   };
 
@@ -135,10 +162,44 @@ export default function LoginPage() {
         )}
 
         <Card className={cn(
-          "border-border/30 bg-black/40 backdrop-blur-3xl shadow-2xl border-t-primary/40 transition-all duration-500 overflow-hidden",
+          "border-border/30 bg-black/40 backdrop-blur-3xl shadow-2xl border-t-primary/40 transition-all duration-500 overflow-hidden relative",
           error && "border-destructive/60 animate-shake",
-          authStage === 'biometric' && "border-accent/60"
+          (authStage === 'scanning' || authStage === 'biometric_verified') && "border-accent/60"
         )}>
+          {/* Scanning Overlay */}
+          {authStage === 'scanning' && (
+            <div className="absolute inset-0 z-50 bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center p-8 text-center animate-in fade-in duration-300">
+              <div className="relative mb-8">
+                <div className="absolute inset-0 bg-accent/20 blur-3xl rounded-full animate-pulse" />
+                <div className="w-32 h-32 border-2 border-accent/30 rounded-full flex items-center justify-center relative">
+                  <Fingerprint className="w-16 h-16 text-accent animate-pulse" />
+                  <div className="absolute inset-0 border-t-2 border-accent animate-spin" />
+                  <div 
+                    className="absolute inset-x-0 bg-accent/20 transition-all duration-75" 
+                    style={{ height: '2px', top: `${scanProgress}%` }}
+                  />
+                </div>
+                <Scan className="absolute -top-4 -right-4 w-8 h-8 text-accent animate-bounce" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-2xl font-bold text-accent uppercase tracking-tighter italic">Biometric Scan Active</h3>
+                <p className="text-muted-foreground text-[10px] font-mono tracking-widest uppercase">Verifying unique neural-typing signature</p>
+                <div className="w-64 h-1 bg-white/5 rounded-full mt-4 overflow-hidden">
+                  <div className="h-full bg-accent transition-all duration-75" style={{ width: `${scanProgress}%` }} />
+                </div>
+                <p className="text-accent font-mono text-[9px] mt-2">{scanProgress}% SECURE_VERIFY</p>
+              </div>
+            </div>
+          )}
+
+          {authStage === 'biometric_verified' && (
+            <div className="absolute inset-0 z-50 bg-black/90 flex flex-col items-center justify-center animate-in zoom-in-95 duration-300">
+              <CheckCircle2 className="w-20 h-20 text-green-400 animate-bounce" />
+              <h3 className="text-2xl font-black text-green-400 uppercase tracking-tighter mt-4 italic">Biometrics Verified</h3>
+              <p className="text-muted-foreground text-[10px] font-mono mt-2">ESTABLISHING CRYPTOGRAPHIC CHANNEL...</p>
+            </div>
+          )}
+
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary to-transparent opacity-50" />
           
           <CardHeader className="space-y-2 pb-8">
@@ -147,10 +208,6 @@ export default function LoginPage() {
                 {authStage === 'verifying' ? (
                   <span className="flex items-center gap-3 text-primary animate-pulse">
                     <RefreshCw className="w-6 h-6 animate-spin" /> Handshake...
-                  </span>
-                ) : authStage === 'biometric' ? (
-                  <span className="flex items-center gap-3 text-accent animate-pulse">
-                    <Fingerprint className="w-6 h-6" /> Biometrics...
                   </span>
                 ) : authStage === 'established' ? (
                   <span className="flex items-center gap-3 text-green-400">
@@ -173,7 +230,7 @@ export default function LoginPage() {
           </CardHeader>
 
           <CardContent className="space-y-6">
-            <form onSubmit={handleEmailAuth} className="space-y-6">
+            <form onSubmit={handleAuthInitiation} className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-[10px] uppercase tracking-[0.2em] font-bold text-muted-foreground/80">Entity Identifier</Label>
                 <div className="relative group">
@@ -240,10 +297,10 @@ export default function LoginPage() {
               >
                 <div className="relative z-10 flex items-center justify-center gap-3">
                   {isSignUp ? "Initialize Identity" : "Authorize Session"}
-                  <Zap className="w-5 h-5 group-hover:scale-125 transition-transform" />
+                  <Fingerprint className="w-5 h-5 group-hover:scale-125 transition-transform" />
                 </div>
-                {(authStage === 'verifying' || authStage === 'biometric') && (
-                  <div className="absolute inset-0 bg-white/20 animate-pulse" />
+                {(authStage !== 'idle') && (
+                  <div className="absolute inset-0 bg-white/10 animate-pulse" />
                 )}
               </Button>
             </form>
@@ -261,10 +318,10 @@ export default function LoginPage() {
                   <span className="w-1 h-1 bg-primary rounded-full" />
                   [LOG] Encryption keys verified (512-bit)...
                 </p>
-                {authStage === 'biometric' && (
+                {authStage === 'scanning' && (
                   <p className="text-accent tracking-tighter flex items-center gap-2 animate-in slide-in-from-left-2">
                     <span className="w-1 h-1 bg-accent rounded-full animate-ping" />
-                    [LOG] Behavioral biometric scan in progress...
+                    [LOG] Fingerprint hardware interface detected. Scanning...
                   </p>
                 )}
               </div>
@@ -289,7 +346,7 @@ export default function LoginPage() {
                 disabled={authStage !== 'idle'}
               >
                 <Fingerprint className="w-4 h-4 mr-2 text-primary" />
-                {isSignUp ? "Already Registered? Authorize" : "New Personnel? Register DNA"}
+                {isSignUp ? "Already Registered? Authorize" : "New Personnel? Register Personnel"}
               </Button>
             </div>
 
