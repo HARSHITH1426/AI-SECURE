@@ -57,7 +57,6 @@ export default function IdentityAccessPortal() {
   };
 
   useEffect(() => {
-    // Prevent hydration mismatch by setting client-only values in useEffect
     if (typeof window !== 'undefined') {
       setHostname(window.location.hostname.toUpperCase());
       setCurrentDate(new Date().toISOString().split('T')[0]);
