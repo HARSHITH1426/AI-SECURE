@@ -44,8 +44,8 @@ export default function IdentityAccessPortal() {
   const [handshakeStage, setHandshakeStage] = useState<'idle' | 'verifying' | 'scanning' | 'biometric_verified' | 'established'>('idle');
   const [telemetryProgress, setTelemetryProgress] = useState(0);
   
-  const [hostname, setHostname] = useState('SECURE_PRIMARY');
-  const [currentDate, setCurrentDate] = useState('');
+  const [hostname, setHostname] = useState('SECURE_NODE');
+  const [currentDate, setCurrentDate] = useState('YYYY-MM-DD');
 
   const evaluateTokenEntropy = (token: string) => {
     let entropyRating = 0;
@@ -146,7 +146,7 @@ export default function IdentityAccessPortal() {
 
       <div className="w-full max-w-xl z-10 space-y-8">
         <div className="text-center space-y-4">
-          <div className="inline-flex p-5 bg-primary/10 rounded-[2rem] border border-primary/30 shadow-[0_0_50px_-12px_rgba(var(--primary),0.5)] group transition-all duration-700 hover:rotate-[360deg]">
+          <div className="inline-flex p-5 bg-primary/10 rounded-[2rem] border border-primary/30 shadow-[0_0_50px_-12px_hsl(var(--primary)/0.5)] group transition-all duration-700 hover:rotate-[360deg]">
             <Shield className="w-12 h-12 text-primary" />
           </div>
           <div className="space-y-1">
@@ -297,7 +297,7 @@ export default function IdentityAccessPortal() {
 
               <Button 
                 type="submit" 
-                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-black uppercase tracking-tighter h-16 text-xl shadow-[0_20px_40px_-15px_rgba(var(--primary),0.4)] group overflow-hidden relative rounded-xl"
+                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-black uppercase tracking-tighter h-16 text-xl shadow-[0_20px_40px_-15px_hsl(var(--primary)/0.4)] group overflow-hidden relative rounded-xl"
                 disabled={handshakeStage !== 'idle'}
               >
                 <div className="relative z-10 flex items-center justify-center gap-3">
