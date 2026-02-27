@@ -25,7 +25,7 @@ import {
   Activity
 } from 'lucide-react';
 import { useAuth, useUser } from '@/firebase';
-import { initiateEmailSignIn, initiateEmailSignUp, initiateAnonymousSignIn } from '@/firebase/non-blocking-login';
+import { initiateEmailSignIn, initiateEmailSignUp } from '@/firebase/non-blocking-login';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { cn } from '@/lib/utils';
 
@@ -79,19 +79,6 @@ export default function LoginPage() {
           setAuthStage('idle');
         }
       }, 1200);
-    }, 1000);
-  };
-
-  const handleAnonymousAuth = () => {
-    setError(null);
-    setAuthStage('verifying');
-    setTimeout(() => {
-      try {
-        initiateAnonymousSignIn(auth);
-      } catch (err: any) {
-        setError(err.message || "Ephemeral session rejected.");
-        setAuthStage('idle');
-      }
     }, 1000);
   };
 
@@ -290,27 +277,19 @@ export default function LoginPage() {
                 <span className="w-full border-t border-white/10" />
               </div>
               <div className="relative flex justify-center text-[9px] font-mono uppercase tracking-[0.3em]">
-                <span className="bg-[#0A0C10] px-4 text-muted-foreground/50">Alternative Entry</span>
+                <span className="bg-[#0A0C10] px-4 text-muted-foreground/50">Identity Management</span>
               </div>
             </div>
             
-            <div className="grid grid-cols-2 gap-4 w-full">
+            <div className="w-full">
               <Button 
                 variant="outline" 
-                className="border-white/10 bg-transparent hover:bg-white/5 h-12 font-mono text-[10px] uppercase tracking-widest rounded-xl transition-all"
-                onClick={handleAnonymousAuth}
-                disabled={authStage !== 'idle'}
-              >
-                <Fingerprint className="w-4 h-4 mr-2 text-accent" />
-                Guest Link
-              </Button>
-              <Button 
-                variant="outline" 
-                className="border-white/10 bg-transparent hover:bg-white/5 h-12 font-mono text-[10px] uppercase tracking-widest rounded-xl transition-all"
+                className="w-full border-white/10 bg-transparent hover:bg-white/5 h-12 font-mono text-[10px] uppercase tracking-widest rounded-xl transition-all"
                 onClick={() => setIsSignUp(!isSignUp)}
                 disabled={authStage !== 'idle'}
               >
-                {isSignUp ? "Identity Check" : "Register DNA"}
+                <Fingerprint className="w-4 h-4 mr-2 text-primary" />
+                {isSignUp ? "Already Registered? Authorize" : "New Personnel? Register DNA"}
               </Button>
             </div>
 
