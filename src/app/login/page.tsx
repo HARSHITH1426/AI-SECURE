@@ -57,6 +57,7 @@ export default function IdentityAccessPortal() {
   };
 
   useEffect(() => {
+    // Prevent hydration mismatch by setting client-only values in useEffect
     if (typeof window !== 'undefined') {
       setHostname(window.location.hostname.toUpperCase());
       setCurrentDate(new Date().toISOString().split('T')[0]);
@@ -160,7 +161,7 @@ export default function IdentityAccessPortal() {
         </div>
 
         {protocolAlert && (
-          <Alert variant="destructive" className="bg-destructive/10 border-destructive/30 text-destructive animate-in slide-in-from-top-4 border-2">
+          <Alert variant="destructive" className="bg-destructive/10 border-destructive/30 text-destructive animate-in slide-in-from-top-4 border-2 animate-shake">
             <AlertCircle className="h-5 w-5" />
             <AlertTitle className="font-bold uppercase tracking-tight">Security Alert: Access Denied</AlertTitle>
             <AlertDescription className="font-mono text-xs mt-1">{protocolAlert}</AlertDescription>
@@ -169,7 +170,7 @@ export default function IdentityAccessPortal() {
 
         <Card className={cn(
           "border-border/30 bg-black/40 backdrop-blur-3xl shadow-2xl border-t-primary/40 transition-all duration-500 overflow-hidden relative",
-          protocolAlert && "border-destructive/60 animate-shake",
+          protocolAlert && "border-destructive/60",
           (handshakeStage === 'scanning' || handshakeStage === 'biometric_verified') && "border-accent/60"
         )}>
           {handshakeStage === 'scanning' && (
