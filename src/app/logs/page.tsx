@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { 
@@ -26,6 +26,11 @@ import { analyzeAuditLedger, ForensicAnalysisOutput } from '@/ai/flows/forensic-
 export default function LogsPage() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysis, setAnalysis] = useState<ForensicAnalysisOutput | null>(null);
+  const [reportTimestamp, setReportTimestamp] = useState('');
+
+  useEffect(() => {
+    setReportTimestamp(new Date().toISOString());
+  }, []);
 
   const handleAIAnalysis = async () => {
     setIsAnalyzing(true);
@@ -115,7 +120,7 @@ export default function LogsPage() {
           </CardContent>
           <CardFooter className="bg-accent/10 py-2 border-t border-accent/20">
             <p className="text-[10px] font-mono text-accent/60 mx-auto uppercase tracking-tighter">
-              Analysis timestamp: {new Date().toISOString()} // SIGNATURE: AI-FORENSIC-V4
+              Analysis timestamp: {reportTimestamp} // SIGNATURE: AI-FORENSIC-V4
             </p>
           </CardFooter>
         </Card>

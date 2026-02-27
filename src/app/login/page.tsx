@@ -43,6 +43,9 @@ export default function IdentityAccessPortal() {
   const [revealToken, setRevealToken] = useState(false);
   const [handshakeStage, setHandshakeStage] = useState<'idle' | 'verifying' | 'scanning' | 'biometric_verified' | 'established'>('idle');
   const [telemetryProgress, setTelemetryProgress] = useState(0);
+  
+  const [hostname, setHostname] = useState('SECURE_PRIMARY');
+  const [currentDate, setCurrentDate] = useState('');
 
   const evaluateTokenEntropy = (token: string) => {
     let entropyRating = 0;
@@ -52,6 +55,13 @@ export default function IdentityAccessPortal() {
     if (token.match(/[^A-Za-z0-9]/)) entropyRating += 25;
     return entropyRating;
   };
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setHostname(window.location.hostname.toUpperCase());
+      setCurrentDate(new Date().toISOString().split('T')[0]);
+    }
+  }, []);
 
   useEffect(() => {
     if (activeEntity && !isCipherLoading) {
@@ -144,7 +154,7 @@ export default function IdentityAccessPortal() {
               CogniSecure <span className="text-primary">Vault</span>
             </h1>
             <p className="text-muted-foreground text-[10px] font-mono tracking-[0.5em] uppercase opacity-50">
-              Authorized Personnel Only // Node: {typeof window !== 'undefined' ? window.location.hostname.toUpperCase() : 'SECURE_PRIMARY'}
+              Authorized Personnel Only // Node: {hostname}
             </p>
           </div>
         </div>
@@ -339,7 +349,7 @@ export default function IdentityAccessPortal() {
         </Card>
 
         <div className="flex justify-between items-center px-4 text-[9px] font-mono text-muted-foreground/30 uppercase tracking-[0.4em]">
-          <span>{new Date().toISOString().split('T')[0]}</span>
+          <span>{currentDate}</span>
           <span className="flex items-center gap-2">
             <span className="w-1.5 h-1.5 rounded-full bg-green-500/20" />
             Active-Secure
