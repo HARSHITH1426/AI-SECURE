@@ -11,17 +11,14 @@ import {
   Shield, 
   Lock, 
   User, 
-  Fingerprint, 
   AlertCircle, 
   Key,
-  CheckCircle2,
   Globe,
   Loader2
 } from 'lucide-react';
 import { useAuth, useUser } from '@/firebase';
 import { initiateIdentityCreation, initiateIdentityValidation, authorizeFederatedNode } from '@/firebase/non-blocking-login';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { cn } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
 
 export default function LoginPage() {
@@ -33,51 +30,30 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [isRegistering, setIsRegistering] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [status, setStatus] = useState<'idle' | 'verifying' | 'scanning' | 'done'>('idle');
-  const [scanProgress, setScanProgress] = useState(0);
+  const [status, setStatus] = useState<'idle' | 'verifying' | 'done'>('idle');
 
   useEffect(() => {
     if (user && !isUserLoading) {
       setStatus('done');
-      const timer = setTimeout(() => {
-        router.push('/dashboard');
-      }, 800);
-      return () => clearTimeout(timer);
+      router.push('/dashboard');
     }
   }, [user, isUserLoading, router]);
-
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (status === 'scanning') {
-      interval = setInterval(() => {
-        setScanProgress((prev) => {
-          if (prev >= 100) {
-            clearInterval(interval);
-            // Initiate actual firebase call
-            try {
-              if (isRegistering) {
-                initiateIdentityCreation(authInstance, email, password);
-              } else {
-                initiateIdentityValidation(authInstance, email, password);
-              }
-            } catch (err: any) {
-              setError("Authentication failed. Please check your credentials.");
-              setStatus('idle');
-            }
-            return 100;
-          }
-          return prev + 10;
-        });
-      }, 60);
-    }
-    return () => clearInterval(interval);
-  }, [status, authInstance, email, password, isRegistering]);
 
   const handleAuth = (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setStatus('verifying');
-    setTimeout(() => setStatus('scanning'), 600);
+    
+    try {
+      if (isRegistering) {
+        initiateIdentityCreation(authInstance, email, password);
+      } else {
+        initiateIdentityValidation(authInstance, email, password);
+      }
+    } catch (err: any) {
+      setError("Failed to authenticate. Please check your credentials.");
+      setStatus('idle');
+    }
   };
 
   const handleGoogleLogin = () => {
@@ -94,17 +70,17 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-6 relative">
-      <div className="w-full max-w-md z-10 space-y-6">
+    <div className="min-h-screen bg-background flex items-center justify-center p-6">
+      <div className="w-full max-w-md space-y-6">
         <div className="text-center space-y-2">
           <div className="inline-flex p-3 bg-primary/10 rounded-xl border border-primary/20 mb-2">
             <Shield className="w-8 h-8 text-primary" />
           </div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">
-            Secure Vault
+            Vault Access
           </h1>
           <p className="text-muted-foreground text-xs uppercase tracking-widest opacity-60">
-            Authorized Personnel Only
+            Secure Authentication Portal
           </p>
         </div>
 
@@ -116,34 +92,21 @@ export default function LoginPage() {
           </Alert>
         )}
 
-        <Card className="border-border/50 bg-card/50 backdrop-blur-sm relative overflow-hidden">
-          {status === 'scanning' && (
-            <div className="absolute inset-0 z-50 bg-background/95 flex flex-col items-center justify-center p-8 text-center">
-              <div className="relative mb-4">
-                <Fingerprint className="w-16 h-16 text-primary animate-pulse" />
-                <div className="absolute inset-0 border-2 border-primary/20 animate-ping rounded-full" />
-              </div>
-              <h3 className="text-sm font-bold text-primary uppercase">Fingerprint Scan</h3>
-              <div className="w-32 h-1 bg-muted rounded-full mt-4 overflow-hidden">
-                <div className="h-full bg-primary transition-all duration-300" style={{ width: `${scanProgress}%` }} />
-              </div>
-            </div>
-          )}
-
+        <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
           <CardHeader>
             <div className="flex justify-between items-center">
               <CardTitle className="text-lg font-bold flex items-center gap-2">
                 <Lock className="w-4 h-4 text-primary" />
-                {isRegistering ? "Create Account" : "Login"}
+                {isRegistering ? "Create Account" : "Sign In"}
               </CardTitle>
-              <Badge variant="outline" className="text-[10px] uppercase font-mono">v4.0</Badge>
+              <Badge variant="outline" className="text-[10px] uppercase font-mono">v1.0</Badge>
             </div>
           </CardHeader>
 
           <CardContent className="space-y-4">
             <form onSubmit={handleAuth} className="space-y-4">
               <div className="space-y-1.5">
-                <Label className="text-[10px] font-bold uppercase text-muted-foreground">Email Address</Label>
+                <Label className="text-[10px] font-bold uppercase text-muted-foreground">Email</Label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input 
@@ -177,7 +140,7 @@ export default function LoginPage() {
                 className="w-full font-bold uppercase text-xs h-11"
                 disabled={status !== 'idle'}
               >
-                {status === 'verifying' ? <Loader2 className="w-4 h-4 animate-spin" /> : (isRegistering ? "Register" : "Login")}
+                {status === 'verifying' ? <Loader2 className="w-4 h-4 animate-spin" /> : (isRegistering ? "Register" : "Log In")}
               </Button>
             </form>
 
@@ -204,7 +167,7 @@ export default function LoginPage() {
               className="w-full text-[10px] font-bold text-muted-foreground"
               onClick={() => setIsRegistering(!isRegistering)}
             >
-              {isRegistering ? "Already have an account? Login" : "New user? Create an identity"}
+              {isRegistering ? "Already have an account? Log in" : "New user? Create an account"}
             </Button>
           </CardFooter>
         </Card>

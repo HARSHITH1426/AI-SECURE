@@ -23,12 +23,7 @@
     --border: 223 15% 85%;
     --input: 223 15% 85%;
     --ring: 220 70% 60%;
-    --radius: 0.75rem;
-    --chart-1: 220 70% 60%;
-    --chart-2: 190 85% 55%;
-    --chart-3: 160 60% 45%;
-    --chart-4: 30 80% 55%;
-    --chart-5: 280 65% 60%;
+    --radius: 0.5rem;
   }
 
   .dark {
@@ -51,11 +46,6 @@
     --border: 223 15% 18%;
     --input: 223 15% 18%;
     --ring: 220 70% 60%;
-    --chart-1: 220 70% 60%;
-    --chart-2: 190 85% 55%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
   }
 }
 
@@ -66,49 +56,4 @@
   body {
     @apply bg-background text-foreground font-body;
   }
-}
-
-.glass {
-  @apply bg-opacity-10 backdrop-blur-md border border-white border-opacity-10;
-}
-
-.gradient-text {
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-[#5281E0] to-[#2BCDEE];
-}
-
-.risk-gradient {
-  background: linear-gradient(90deg, #2BCDEE 0%, #5281E0 50%, #f43f5e 100%);
-}
-
-@keyframes glitch {
-  0% { transform: translate(0) }
-  20% { transform: translate(-2px, 2px) }
-  40% { transform: translate(-2px, -2px) }
-  60% { transform: translate(2px, 2px) }
-  80% { transform: translate(2px, -2px) }
-  100% { transform: translate(0) }
-}
-
-.animate-glitch {
-  animation: glitch 0.3s cubic-bezier(.25,.46,.45,.94) both infinite;
-}
-
-@keyframes pulse-accent {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(1.05); }
-}
-
-.animate-pulse-accent {
-  animation: pulse-accent 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-5px); }
-  50% { transform: translateX(5px); }
-  75% { transform: translateX(-5px); }
-}
-
-.animate-shake {
-  animation: shake 0.4s ease-in-out infinite;
 }

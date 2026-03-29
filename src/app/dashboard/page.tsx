@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Shield, Lock, AlertTriangle, Activity, Zap, Fingerprint, Eye } from 'lucide-react';
+import { Shield, Lock, AlertTriangle, Activity, Zap, Eye } from 'lucide-react';
 import { currentSystemStats, mockThreats } from '@/lib/mock-data';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip } from 'recharts';
 
@@ -26,44 +26,44 @@ export default function DashboardStats() {
   }, []);
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
+    <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Security Telemetry</h1>
-          <p className="text-sm text-muted-foreground">Real-time risk metrics from the Trust-Entropy Engine</p>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Security Metrics</h1>
+          <p className="text-sm text-muted-foreground">System health and threat monitoring</p>
         </div>
         <div className="flex items-center gap-2">
-          <Badge variant="outline" className="border-accent/30 text-accent bg-accent/5 animate-pulse-accent">
+          <Badge variant="outline" className="border-accent/30 text-accent bg-accent/5">
             <Zap className="w-3 h-3 mr-1" /> Monitoring Active
           </Badge>
-          <Badge variant="secondary" className="text-[10px] font-mono">NODE_DELTA_V4</Badge>
+          <Badge variant="secondary" className="text-[10px] font-mono">NODE_V1</Badge>
         </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatWidget 
-          label="Global Integrity" 
+          label="Trust Score" 
           value={`${currentSystemStats.trustScore}%`} 
-          desc="System Trust Index" 
+          desc="Overall Integrity" 
           icon={<Shield className="w-4 h-4 text-primary" />}
         />
         <StatWidget 
-          label="Entropy Level" 
+          label="Activity Level" 
           value={currentSystemStats.entropyLevel} 
-          desc="Signal Density" 
+          desc="Traffic Density" 
           icon={<Activity className="w-4 h-4 text-accent" />}
         />
         <StatWidget 
-          label="Active Flags" 
+          label="Recent Alerts" 
           value={currentSystemStats.activeThreats} 
-          desc="Security Anomalies" 
+          desc="Flagged Events" 
           icon={<AlertTriangle className="w-4 h-4 text-destructive" />}
         />
         <StatWidget 
-          label="Neural Match" 
-          value="99.4%" 
-          desc="Biometric Confidence" 
-          icon={<Fingerprint className="w-4 h-4 text-primary" />}
+          label="Uptime" 
+          value="99.9%" 
+          desc="System Reliability" 
+          icon={<Zap className="w-4 h-4 text-primary" />}
         />
       </div>
 
@@ -72,9 +72,9 @@ export default function DashboardStats() {
           <CardHeader>
             <CardTitle className="text-base font-bold flex items-center gap-2">
               <Activity className="w-4 h-4 text-primary" />
-              Risk Trend Analysis
+              System Load Trend
             </CardTitle>
-            <CardDescription className="text-xs">24-hour aggregate risk factor</CardDescription>
+            <CardDescription className="text-xs">24-hour activity log</CardDescription>
           </CardHeader>
           <CardContent className="h-[280px]">
             {mounted ? (
@@ -107,7 +107,7 @@ export default function DashboardStats() {
           <CardHeader>
             <CardTitle className="text-base font-bold flex items-center gap-2">
               <Eye className="w-4 h-4 text-accent" />
-              Recent Alerts
+              Notifications
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -125,18 +125,18 @@ export default function DashboardStats() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card className="border-border/10 bg-card/40">
           <CardHeader>
-            <CardTitle className="text-base font-bold">Biometric Authentication</CardTitle>
+            <CardTitle className="text-base font-bold">Data Security</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <MetricProgress label="Typing Rhythm Match" value={92} color="text-accent" />
-            <MetricProgress label="Session Persistence" value={100} color="text-primary" />
-            <MetricProgress label="Neural Drift" value={4} color="text-muted-foreground" />
+            <MetricProgress label="Encryption Health" value={98} color="text-accent" />
+            <MetricProgress label="Backup Sync" value={100} color="text-primary" />
+            <MetricProgress label="Audit Coverage" value={95} color="text-muted-foreground" />
           </CardContent>
         </Card>
 
         <Card className="border-border/10 bg-card/40">
           <CardHeader>
-            <CardTitle className="text-base font-bold">Cryptographic Status</CardTitle>
+            <CardTitle className="text-base font-bold">Network Status</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-3">
@@ -147,14 +147,14 @@ export default function DashboardStats() {
                 </div>
               </div>
               <div className="p-3 rounded bg-muted/20 border border-border/10">
-                <p className="text-[9px] text-muted-foreground uppercase font-bold">Policy</p>
-                <div className="text-sm font-bold">Hardened</div>
+                <p className="text-[9px] text-muted-foreground uppercase font-bold">Mode</p>
+                <div className="text-sm font-bold">Standard</div>
               </div>
               <div className="col-span-2 p-3 rounded bg-muted/20 border border-border/10">
-                <p className="text-[9px] text-muted-foreground uppercase font-bold mb-2">Key Rotation Progress</p>
+                <p className="text-[9px] text-muted-foreground uppercase font-bold mb-2">Sync Progress</p>
                 <div className="flex items-center gap-3">
-                  <Progress value={75} className="h-1 flex-1" />
-                  <span className="text-[9px] font-mono text-muted-foreground">02:45:00</span>
+                  <Progress value={85} className="h-1 flex-1" />
+                  <span className="text-[9px] font-mono text-muted-foreground">85%</span>
                 </div>
               </div>
             </div>
@@ -173,7 +173,7 @@ function StatWidget({ label, value, desc, icon }: { label: string, value: string
         {icon}
       </CardHeader>
       <CardContent className="pb-4">
-        <div className="text-xl font-black">{value}</div>
+        <div className="text-xl font-bold">{value}</div>
         <p className="text-[10px] text-muted-foreground">{desc}</p>
       </CardContent>
     </Card>
