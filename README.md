@@ -1,42 +1,30 @@
-# CogniSecure Vault // Node_V4
+# Secure Vault
 
-A high-performance, self-evolving cryptographic data vault architecture built with Next.js 15, Firebase, and Genkit AI.
+A secure data management platform for storing and auditing sensitive assets. Built with Next.js, Firebase, and Tailwind CSS.
 
-## Technical Overview
+## Features
 
-CogniSecure Vault is a specialized security platform designed for mission-critical data protection. It leverages a unique "Trust-Entropy" driven cryptographic model to provide adaptive security based on real-time risk assessment and behavioral biometric verification.
+- **Encrypted Storage**: Secure file management with multi-layer encryption.
+- **Audit Logs**: Real-time logging of all security events and access attempts.
+- **Authentication**: Supports both email/password and Google login.
+- **Dashboard**: Visual metrics for system health and security status.
 
-## Core Architecture
+## Getting Started
 
-- **Adaptive Encryption**: Dynamic AES-256-GCM key rotation triggered by contextual entropy shifts.
-- **Continuous Behavioral Authentication**: Advanced monitoring of "neural-typing" patterns to detect session hijacking.
-- **Immutable Forensic Ledger**: Blockchain-verified audit trails for tamper-proof security logging.
-- **Cognitive Threat Intelligence**: Integrated Genkit flows for automated forensic log analysis and strategic mitigation recommendations.
+1.  **Install dependencies**:
+    ```bash
+    npm install
+    ```
 
-## Local Deployment Protocol
+2.  **Configure Environment**:
+    Add your `FIREBASE_CONFIG` and `GOOGLE_GENAI_API_KEY` to the `.env` file.
 
-To initialize a local instance of the vault, execute the following commands in the project root:
+3.  **Run the development server**:
+    ```bash
+    npm run dev
+    ```
+    Open [http://localhost:9003](http://localhost:9003) to see the application.
 
-1. **Synchronize Environment**:
-   Ensure `.env` contains valid `FIREBASE_CONFIG` and `GOOGLE_GENAI_API_KEY` identifiers.
+## Security
 
-2. **Launch Secure Portal (Next.js)**:
-   ```bash
-   npm run dev
-   ```
-   Access the node interface at `http://localhost:9003`.
-
-3. **Initialize AI Security Layer (Genkit)**:
-   ```bash
-   npm run genkit:dev
-   ```
-   This activates the forensic analysis engine for real-time threat evaluation.
-
-## Security Disclosure
-
-This project implements experimental cryptographic patterns. Ensure all security rules are reviewed and the sentinel admin collection is properly provisioned before any deployment.
-
----
-**NODE_STATUS**: ACTIVE
-**PROTOCOL**: XTS-AES-512
-**ENCRYPTION**: VERIFIED
+This project implements industry-standard security practices, including secure headers, encrypted data transmission, and granular access controls.
