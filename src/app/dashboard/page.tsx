@@ -1,11 +1,12 @@
 "use client"
 
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Shield, Lock, AlertTriangle, Activity, Zap, Fingerprint, Eye } from 'lucide-react';
 import { currentSystemStats, mockThreats } from '@/lib/mock-data';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip } from 'recharts';
 
 const RISK_TELEMETRY_DATA = [
   { epoch: '00:00', riskFactor: 0.12 },
@@ -18,6 +19,12 @@ const RISK_TELEMETRY_DATA = [
 ];
 
 export default function SecureTelemetryCenter() {
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   return (
     <div className="space-y-8 animate-in fade-in duration-700">
       <div className="flex justify-between items-end">
@@ -74,21 +81,29 @@ export default function SecureTelemetryCenter() {
             <CardDescription>24-hour window aggregated from all layers</CardDescription>
           </CardHeader>
           <CardContent className="h-[300px] pt-4">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={RISK_TELEMETRY_DATA}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#333" />
-                <XAxis dataKey="epoch" stroke="#888" fontSize={12} />
-                <YAxis stroke="#888" fontSize={12} />
-                <Line 
-                  type="monotone" 
-                  dataKey="riskFactor" 
-                  stroke="hsl(var(--primary))" 
-                  strokeWidth={3} 
-                  dot={{ r: 4, fill: "hsl(var(--primary))", strokeWidth: 2 }}
-                  activeDot={{ r: 6, fill: "hsl(var(--accent))" }} 
-                />
-              </LineChart>
-            </ResponsiveContainer>
+            {isMounted ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={RISK_TELEMETRY_DATA}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#333" />
+                  <XAxis dataKey="epoch" stroke="#888" fontSize={12} />
+                  <YAxis stroke="#888" fontSize={12} />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))' }}
+                    itemStyle={{ color: 'hsl(var(--primary))' }}
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="riskFactor" 
+                    stroke="hsl(var(--primary))" 
+                    strokeWidth={3} 
+                    dot={{ r: 4, fill: "hsl(var(--primary))", strokeWidth: 2 }}
+                    activeDot={{ r: 6, fill: "hsl(var(--accent))" }} 
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="w-full h-full bg-muted/20 animate-pulse rounded-lg" />
+            )}
           </CardContent>
         </Card>
 

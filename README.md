@@ -34,7 +34,7 @@ To initialize a local instance of the vault, execute the following commands in t
 
 ## Security Disclosure
 
-This project implements experimental cryptographic patterns. Ensure all security rules are reviewed and the sentinel admin collection is properly provisioned before any production grade deployment.
+This project implements experimental cryptographic patterns. Ensure all security rules are reviewed and the sentinel admin collection is properly provisioned before any deployment.
 
 ---
 **NODE_STATUS**: ACTIVE
