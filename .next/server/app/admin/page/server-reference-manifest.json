@@ -1,0 +1,20 @@
+{
+  "node": {
+    "4068b967d517950621d7eb158955f0b070c3d3e162": {
+      "workers": {
+        "app/admin/page": {
+          "moduleId": "[project]/.next-internal/server/app/admin/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/ai/flows/admin-threat-insight-summary.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "adminThreatInsightSummary",
+          "filename": "src/ai/flows/admin-threat-insight-summary.ts"
+        }
+      },
+      "layer": {
+        "app/admin/page": "action-browser"
+      },
+      "exportedName": "adminThreatInsightSummary",
+      "filename": "src/ai/flows/admin-threat-insight-summary.ts"
+    }
+  },
+  "edge": {}
+}

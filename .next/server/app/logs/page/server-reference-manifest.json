@@ -1,0 +1,16 @@
+{
+  "node": {
+    "406226310a65a772d4b114e09fda9345da296e9bf7": {
+      "workers": {
+        "app/logs/page": {
+          "moduleId": "[project]/.next-internal/server/app/logs/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/ai/flows/forensic-log-analysis.ts [app-rsc] (ecmascript)\" } [app-rsc] (ecmascript)",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/logs/page": "action-browser"
+      }
+    }
+  },
+  "edge": {}
+}
