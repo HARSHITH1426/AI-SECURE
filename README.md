@@ -1,6 +1,6 @@
 # AI-SECURE (FitTrack)
 
-FitTrack is a modern web application built with React, Vite, and Tailwind CSS, integrated with Firebase for authentication and data storage. It allows users to track their workouts, visualize their progress, and export their data.
+FitTrack is a React-based web application that helps users track their workouts, visualize their progress, and export their data.
 
 ## Features
 
@@ -20,7 +20,7 @@ FitTrack is a modern web application built with React, Vite, and Tailwind CSS, i
 ### Prerequisites
 
 - Node.js installed on your machine.
-- A Firebase account and project.
+- A Firebase project set up.
 
 ### Installation
 
@@ -35,11 +35,7 @@ FitTrack is a modern web application built with React, Vite, and Tailwind CSS, i
     npm install
     ```
 
-3.  **Setup Firebase:**
-    - Create a `.env` file in the root directory.
-    - Add your Firebase configuration keys.
-
-4.  **Run the application:**
+3.  **Run the application:**
     ```bash
     npm run dev
     ```
