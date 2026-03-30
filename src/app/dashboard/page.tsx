@@ -47,6 +47,8 @@ export default function DashboardStats() {
 
   const currentRiskLevel = userProfile?.currentRiskLevel || "LOW";
 
+  if (!mounted) return null;
+
   return (
     <div className="space-y-10 animate-in fade-in slide-in-from-bottom-6 duration-1000">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -110,7 +112,7 @@ export default function DashboardStats() {
             </div>
           </CardHeader>
           <CardContent className="h-[320px] pt-8">
-            {mounted && riskData.length > 0 ? (
+            {riskData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={riskData}>
                   <defs>

@@ -31,14 +31,18 @@ service cloud.firestore {
     }
 
     match /securityLogs/{logId} {
-      // Allow authenticated users to view logs (Dashboard queries are filtered by userId)
-      allow read: if isSignedIn();
+      // Explicitly allow list operations where the user only queries their own logs
+      allow list: if isSignedIn() && (request.query.limit <= 100 && (request.auth.uid == resource.data.userId || isAdmin()));
+      // Allow direct document access
+      allow get: if isSignedIn() && (request.auth.uid == resource.data.userId || isAdmin());
+      // Allow creation of logs for the current user
       allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      // Maintenance and auditing restricted to admins
       allow update, delete: if isAdmin();
     }
 
     match /admins/{adminId} {
-      allow read: if isSignedIn(); // Allow internal exists() checks to function
+      allow read: if isSignedIn();
     }
   }
 }
