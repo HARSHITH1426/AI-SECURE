@@ -31,10 +31,8 @@ service cloud.firestore {
     }
 
     match /securityLogs/{logId} {
-      // Explicitly allow list operations where the user only queries their own logs
-      allow list: if isSignedIn() && (request.query.limit <= 100 && (request.auth.uid == resource.data.userId || isAdmin()));
-      // Allow direct document access
-      allow get: if isSignedIn() && (request.auth.uid == resource.data.userId || isAdmin());
+      // Simplified read rule to ensure collection queries (list) and document reads (get) work correctly
+      allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
       // Allow creation of logs for the current user
       allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
       // Maintenance and auditing restricted to admins
