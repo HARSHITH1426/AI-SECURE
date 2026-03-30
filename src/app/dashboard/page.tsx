@@ -8,6 +8,7 @@ import { Shield, Lock, AlertTriangle, Activity, Zap, Eye, BrainCircuit, Fingerpr
 import { useCollection, useFirestore, useUser, useMemoFirebase } from '@/firebase';
 import { collection, query, orderBy, limit } from 'firebase/firestore';
 import { ResponsiveContainer, Tooltip, AreaChart, Area, XAxis, YAxis, CartesianGrid } from 'recharts';
+import { cn } from '@/lib/utils';
 
 export default function DashboardStats() {
   const [mounted, setMounted] = useState(false);
