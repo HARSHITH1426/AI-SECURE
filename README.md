@@ -1,13 +1,14 @@
-# AI-SECURE (FitTrack)
+# FitTrack - AI-Powered Personal Fitness Tracker
 
-FitTrack is a React-based web application that helps users track their workouts, visualize their progress, and export their data.
+FitTrack is a modern web application built with React, Redux, and Firebase. It helps users track their workouts, monitor their fitness progress through interactive charts, and securely store their data.
 
 ## Features
 
-- **Dashboard**: High-level overview of workout stats and progress.
-- **Activity Log**: Add, view, and manage your workout activities.
-- **Data Export**: Export your workout history as a JSON file.
-- **Authentication**: Secure user login/signup via Firebase.
+- **User Authentication**: Secure login and sign-up using Firebase Authentication.
+- **Dashboard**: Visualize your fitness journey with activity summaries and progress charts.
+- **Activity Management**: Log new activities, view history, and manage your workout data.
+- **Data Export**: Export your activity data to a JSON file for personal backup or analysis.
+- **Responsive Design**: Built with Tailwind CSS for a seamless experience on all devices.
 
 ## Tech Stack
 
@@ -16,13 +17,6 @@ FitTrack is a React-based web application that helps users track their workouts,
 - **Backend**: Firebase (Authentication & Firestore).
 
 ## Getting Started
-
-### Prerequisites
-
-- Node.js installed on your machine.
-- A Firebase project set up.
-
-### Installation
 
 1.  **Clone the repository:**
     ```bash
