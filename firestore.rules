@@ -31,7 +31,7 @@ service cloud.firestore {
     }
 
     match /securityLogs/{logId} {
-      // Simplified read rule to ensure collection queries (list) and document reads (get) work correctly
+      // Allow listing logs if the user is authorized for those specific logs
       allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
       // Allow creation of logs for the current user
       allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
