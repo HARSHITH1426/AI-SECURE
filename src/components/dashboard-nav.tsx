@@ -1,16 +1,18 @@
+"use client"
+
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Shield, Lock, Database, History, Settings, User, AlertCircle, LayoutDashboard, LogOut, Fingerprint } from 'lucide-react';
+import { Shield, Database, History, Settings, LogOut, LayoutDashboard, Fingerprint, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth, useUser } from '@/firebase';
 import { signOut } from 'firebase/auth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 const navItems = [
-  { name: 'Security Posture', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'Data Vault', href: '/vault', icon: Database },
-  { name: 'Audit Ledger', href: '/logs', icon: History },
-  { name: 'Policy Control', href: '/admin', icon: Settings },
+  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { name: 'Vault', href: '/vault', icon: Database },
+  { name: 'Audit Logs', href: '/logs', icon: History },
+  { name: 'Governance', href: '/admin', icon: Settings },
 ];
 
 export function DashboardNav() {
@@ -25,17 +27,19 @@ export function DashboardNav() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-card border-r w-64 fixed left-0 top-0">
-      <div className="p-6">
-        <div className="flex items-center gap-2 mb-8">
-          <div className="bg-primary p-2 rounded-lg relative overflow-hidden group">
-            <Shield className="w-6 h-6 text-white transition-transform group-hover:scale-110" />
-            <div className="absolute inset-0 bg-white/20 animate-pulse pointer-events-none" />
+    <div className="flex flex-col h-full glass w-72 fixed left-0 top-0 z-50">
+      <div className="p-8">
+        <div className="flex items-center gap-3 mb-10 group">
+          <div className="bg-primary/20 p-2.5 rounded-xl neon-glow-primary transition-transform group-hover:rotate-12">
+            <Shield className="w-6 h-6 text-primary" />
           </div>
-          <span className="font-bold text-xl tracking-tight text-foreground italic">Cogni<span className="text-primary">Secure</span></span>
+          <div>
+            <span className="font-bold text-lg tracking-wider text-foreground block font-orbitron">SENTINEL<span className="text-primary">VAULT</span></span>
+            <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold opacity-60">AI Node v4.0</span>
+          </div>
         </div>
 
-        <nav className="space-y-1">
+        <nav className="space-y-2">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;
@@ -44,59 +48,62 @@ export function DashboardNav() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex items-center gap-3 px-4 py-3 rounded-md transition-all text-sm font-medium",
+                  "flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all duration-300 group",
                   isActive 
-                    ? "bg-primary text-white shadow-lg shadow-primary/20" 
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                    ? "bg-primary text-primary-foreground neon-glow-primary font-bold shadow-lg" 
+                    : "text-muted-foreground hover:bg-white/5 hover:text-primary"
                 )}
               >
-                <Icon className="w-4 h-4" />
-                {item.name}
+                <Icon className={cn("w-5 h-5 transition-transform group-hover:scale-110", isActive ? "text-primary-foreground" : "text-primary/70")} />
+                <span className="text-sm tracking-wide">{item.name}</span>
               </Link>
             );
           })}
         </nav>
       </div>
 
-      <div className="mt-auto p-6 space-y-4">
+      <div className="mt-auto p-8 space-y-6">
         {user && (
-          <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg border border-border/50">
-            <Avatar className="h-8 w-8 border border-primary/20">
+          <div className="flex items-center gap-4 p-4 bg-white/5 rounded-2xl border border-white/10 glass">
+            <Avatar className="h-10 w-10 border-2 border-primary/30">
               <AvatarImage src={user.photoURL || undefined} />
-              <AvatarFallback className="bg-primary/10 text-primary text-[10px]">
-                {user.email?.substring(0, 2).toUpperCase() || 'AN'}
+              <AvatarFallback className="bg-primary/10 text-primary font-bold">
+                {user.email?.substring(0, 2).toUpperCase() || 'SV'}
               </AvatarFallback>
             </Avatar>
             <div className="overflow-hidden">
-              <p className="text-xs font-bold truncate">{user.displayName || 'Vault User'}</p>
-              <p className="text-[10px] text-muted-foreground truncate font-mono">{user.email || 'Guest Session'}</p>
+              <p className="text-sm font-bold truncate text-foreground">{user.displayName || 'Authorized User'}</p>
+              <p className="text-[10px] text-muted-foreground truncate font-mono opacity-60">{user.email}</p>
             </div>
           </div>
         )}
 
-        <div className="bg-muted/50 p-4 rounded-xl border border-border/50">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">System State</span>
-            <div className="w-2 h-2 rounded-full bg-accent animate-pulse-accent" />
+        <div className="bg-gradient-to-br from-primary/10 to-accent/10 p-5 rounded-2xl border border-white/5 relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-2 opacity-20">
+            <Zap className="w-8 h-8 text-primary" />
           </div>
-          <div className="text-xs space-y-1">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-[10px] text-primary font-black uppercase tracking-widest">Neural Link</span>
+            <div className="w-2 h-2 rounded-full bg-primary animate-pulse shadow-[0_0_10px_#00F5D4]" />
+          </div>
+          <div className="text-[10px] space-y-2 font-mono">
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Encryption</span>
-              <span className="text-foreground font-mono">AES-256</span>
+              <span className="text-muted-foreground">LATENCY</span>
+              <span className="text-foreground">12ms</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Integrity</span>
-              <span className="text-foreground font-mono">100% Verified</span>
+              <span className="text-muted-foreground">INTEGRITY</span>
+              <span className="text-primary">SECURE</span>
             </div>
           </div>
         </div>
 
         <button 
           onClick={handleSignOut}
-          className="flex items-center gap-3 w-full px-4 py-3 rounded-md text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors cursor-pointer group"
+          className="flex items-center gap-4 w-full px-5 py-3.5 rounded-xl text-muted-foreground hover:bg-destructive/20 hover:text-destructive transition-all duration-300 group font-bold text-sm"
         >
-          <LogOut className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-          <span className="text-sm font-medium">Terminate Session</span>
+          <LogOut className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+          <span>TERMINATE LINK</span>
         </button>
       </div>
     </div>
