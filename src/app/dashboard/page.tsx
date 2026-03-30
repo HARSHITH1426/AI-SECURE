@@ -5,9 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Shield, Lock, AlertTriangle, Activity, Zap, Eye, Fingerprint, TrendingUp } from 'lucide-react';
-import { useCollection, useFirestore, useUser, useMemoFirebase } from '@/firebase';
-import { collection, query, orderBy, limit, where } from 'firebase/firestore';
-import { ResponsiveContainer, Tooltip, AreaChart, Area, XAxis, YAxis, CartesianGrid } from 'recharts';
+import { useCollection, useDoc, useFirestore, useUser, useMemoFirebase } from '@/firebase';
+import { collection, query, orderBy, limit, where, doc } from 'firebase/firestore';
+import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import { cn } from '@/lib/utils';
 
 export default function DashboardStats() {
@@ -19,6 +19,15 @@ export default function DashboardStats() {
     setMounted(true);
   }, []);
 
+  // Fetch the user's profile document for adaptive security state
+  const userDocRef = useMemoFirebase(() => {
+    if (!db || !user) return null;
+    return doc(db, 'users', user.uid);
+  }, [db, user]);
+
+  const { data: userProfile } = useDoc(userDocRef);
+
+  // Fetch real-time security logs
   const logsQuery = useMemoFirebase(() => {
     if (!db || !user) return null;
     return query(
@@ -36,7 +45,7 @@ export default function DashboardStats() {
     score: log.riskScore
   })).reverse() || [];
 
-  const currentRiskLevel = user?.currentRiskLevel || "LOW";
+  const currentRiskLevel = userProfile?.currentRiskLevel || "LOW";
 
   return (
     <div className="space-y-10 animate-in fade-in slide-in-from-bottom-6 duration-1000">

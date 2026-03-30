@@ -31,8 +31,7 @@ service cloud.firestore {
     }
 
     match /securityLogs/{logId} {
-      // Allow read if the user owns the log or if they are signed in (for prototype dashboard)
-      // Standardizing to isSignedIn() for broad dashboard visibility in this dev phase
+      // Broad read access for signed-in users to support the prototype's dashboard
       allow read: if isSignedIn(); 
       allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
       allow update, delete: if isAdmin();

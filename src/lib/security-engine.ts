@@ -1,8 +1,7 @@
-
 'use client';
 
 import { analyzeBehavior, type BehavioralOutput } from '@/ai/flows/behavioral-analysis';
-import { doc, updateDoc, collection, addDoc, serverTimestamp, getFirestore } from 'firebase/firestore';
+import { doc, setDoc, collection, addDoc, getFirestore } from 'firebase/firestore';
 import { getAuth, signOut } from 'firebase/auth';
 
 /**
@@ -35,11 +34,12 @@ export async function evaluateSessionRisk(params: {
     ipAddress: 'detected_via_proxy',
   });
 
-  // 2. Update user adaptive state
-  updateDoc(doc(db, 'users', user.uid), {
+  // 2. Update user adaptive state (using setDoc with merge to ensure doc creation)
+  setDoc(doc(db, 'users', user.uid), {
     currentRiskLevel: analysis.riskLevel,
     isLocked: analysis.suggestedAction === 'LOCK_ACCOUNT',
-  });
+    lastUpdated: new Date().toISOString(),
+  }, { merge: true });
 
   // 3. Trigger Adaptive Actions
   if (analysis.suggestedAction === 'LOGOUT' || analysis.suggestedAction === 'LOCK_ACCOUNT') {
