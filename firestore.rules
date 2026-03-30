@@ -3,79 +3,43 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * SENTINELVAULT AI SECURITY RULES
-     *
-     * CORE PHILOSOPHY:
-     * This ruleset implements an adaptive security model. Administrative access is managed
-     * via a Sentinel Collection (/admins), while user data is restricted by UID ownership.
+     * SENTINELVAULT SECURITY RULES
+     * Adaptive access control based on identity and ownership.
      */
-
-    // --- HELPER FUNCTIONS ---
 
     function isSignedIn() {
       return request.auth != null;
-    }
-
-    function isOwner(userId) {
-      return isSignedIn() && request.auth.uid == userId;
     }
 
     function isAdmin() {
       return isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
     }
 
-    function isDataOwner(ownerId) {
-      return isSignedIn() && request.auth.uid == ownerId;
-    }
-
     // --- COLLECTION RULES ---
 
-    /**
-     * @description User profiles and security state.
-     */
     match /users/{userId} {
-      allow get, list: if isOwner(userId) || isAdmin();
-      allow create: if isOwner(userId) && request.resource.data.id == userId;
-      allow update: if (isOwner(userId) || isAdmin()) && resource != null && request.resource.data.id == resource.data.id;
+      allow read: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+      allow create: if isSignedIn() && request.auth.uid == userId;
+      allow update: if isSignedIn() && (request.auth.uid == userId || isAdmin());
       allow delete: if isAdmin();
     }
 
-    /**
-     * @description Encrypted file metadata.
-     */
     match /vaultFiles/{fileId} {
-      allow get, list: if isSignedIn() && (isDataOwner(resource.data.userId) || isAdmin());
+      allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
       allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
-      allow update, delete: if isSignedIn() && (isDataOwner(resource.data.userId) || isAdmin());
+      allow update, delete: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
     }
 
-    /**
-     * @description Audit logs for threat detection.
-     */
     match /securityLogs/{logId} {
-      allow get, list: if isSignedIn(); // Allow listing for dashboard visibility in prototype
+      // Allow read if the user owns the log or if they are signed in (for prototype dashboard)
+      // Standardizing to isSignedIn() for broad dashboard visibility in this dev phase
+      allow read: if isSignedIn(); 
       allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
       allow update, delete: if isAdmin();
     }
 
-    /**
-     * @description Sentinel collection for admin privileges.
-     */
     match /admins/{adminId} {
-      allow get, list: if isAdmin();
-      allow create, update, delete: if isAdmin();
+      allow read: if isAdmin();
     }
-
-    /**
-     * @description Relational session tracking.
-     */
-    match /sessions/{sessionId} {
-      allow get: if (resource != null && isDataOwner(resource.data.userId)) || isAdmin();
-      allow list: if isAdmin();
-      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
-      allow update: if resource != null && (isDataOwner(resource.data.userId) || isAdmin()) && request.resource.data.userId == resource.data.userId;
-      allow delete: if resource != null && (isDataOwner(resource.data.userId) || isAdmin());
-    }
-
   }
 }
