@@ -4,9 +4,9 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Shield, Lock, AlertTriangle, Activity, Zap, Eye, BrainCircuit, Fingerprint, TrendingUp } from 'lucide-react';
+import { Shield, Lock, AlertTriangle, Activity, Zap, Eye, Fingerprint, TrendingUp } from 'lucide-react';
 import { useCollection, useFirestore, useUser, useMemoFirebase } from '@/firebase';
-import { collection, query, orderBy, limit } from 'firebase/firestore';
+import { collection, query, orderBy, limit, where } from 'firebase/firestore';
 import { ResponsiveContainer, Tooltip, AreaChart, Area, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { cn } from '@/lib/utils';
 
@@ -20,9 +20,14 @@ export default function DashboardStats() {
   }, []);
 
   const logsQuery = useMemoFirebase(() => {
-    if (!db) return null;
-    return query(collection(db, 'securityLogs'), orderBy('timestamp', 'desc'), limit(12));
-  }, [db]);
+    if (!db || !user) return null;
+    return query(
+      collection(db, 'securityLogs'), 
+      where('userId', '==', user.uid),
+      orderBy('timestamp', 'desc'), 
+      limit(12)
+    );
+  }, [db, user]);
 
   const { data: logs } = useCollection(logsQuery);
 
@@ -43,13 +48,6 @@ export default function DashboardStats() {
           <p className="text-muted-foreground font-light tracking-wide uppercase text-xs mt-1">Intelligence Stream & Adaptive Security Posture</p>
         </div>
         <div className="flex items-center gap-4">
-          <div className="flex -space-x-2">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="w-8 h-8 rounded-full border-2 border-background bg-muted flex items-center justify-center text-[10px] font-bold">
-                A{i}
-              </div>
-            ))}
-          </div>
           <Badge variant="outline" className="border-primary/30 text-primary bg-primary/5 py-1.5 px-4 font-black tracking-widest uppercase text-[10px] rounded-full neon-glow-primary">
             <Zap className="w-3 h-3 mr-2 fill-primary" /> Active Monitoring
           </Badge>
