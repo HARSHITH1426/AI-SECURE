@@ -31,8 +31,8 @@ service cloud.firestore {
     }
 
     match /securityLogs/{logId} {
-      // Broad read access for signed-in users to support the prototype's dashboard
-      allow read: if isSignedIn(); 
+      // Explicitly allow list and get for authenticated users
+      allow read, list: if isSignedIn(); 
       allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
       allow update, delete: if isAdmin();
     }

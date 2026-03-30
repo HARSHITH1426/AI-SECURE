@@ -1,8 +1,9 @@
 'use client';
 
 import { analyzeBehavior, type BehavioralOutput } from '@/ai/flows/behavioral-analysis';
-import { doc, setDoc, collection, addDoc, getFirestore } from 'firebase/firestore';
+import { doc, collection, getFirestore } from 'firebase/firestore';
 import { getAuth, signOut } from 'firebase/auth';
+import { addDocumentNonBlocking, setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 
 /**
  * Calculates real-time session risk and applies adaptive security policies.
@@ -23,8 +24,8 @@ export async function evaluateSessionRisk(params: {
 
   const analysis = await analyzeBehavior(params);
 
-  // 1. Log the security event
-  addDoc(collection(db, 'securityLogs'), {
+  // 1. Log the security event (Non-blocking)
+  addDocumentNonBlocking(collection(db, 'securityLogs'), {
     userId: user.uid,
     action: 'BEHAVIORAL_EVALUATION',
     timestamp: new Date().toISOString(),
@@ -34,8 +35,8 @@ export async function evaluateSessionRisk(params: {
     ipAddress: 'detected_via_proxy',
   });
 
-  // 2. Update user adaptive state (using setDoc with merge to ensure doc creation)
-  setDoc(doc(db, 'users', user.uid), {
+  // 2. Update user adaptive state (Non-blocking using setDoc with merge)
+  setDocumentNonBlocking(doc(db, 'users', user.uid), {
     currentRiskLevel: analysis.riskLevel,
     isLocked: analysis.suggestedAction === 'LOCK_ACCOUNT',
     lastUpdated: new Date().toISOString(),
