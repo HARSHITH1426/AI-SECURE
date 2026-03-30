@@ -36,7 +36,10 @@ export async function evaluateSessionRisk(params: {
   });
 
   // 2. Update user adaptive state (Non-blocking using setDoc with merge)
+  // Using setDoc ensures the document is created if it doesn't exist.
   setDocumentNonBlocking(doc(db, 'users', user.uid), {
+    id: user.uid,
+    email: user.email,
     currentRiskLevel: analysis.riskLevel,
     isLocked: analysis.suggestedAction === 'LOCK_ACCOUNT',
     lastUpdated: new Date().toISOString(),

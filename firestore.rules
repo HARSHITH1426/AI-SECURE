@@ -31,9 +31,11 @@ service cloud.firestore {
     }
 
     match /securityLogs/{logId} {
-      // Allow authenticated users to read and create logs. 
-      // In production, further restrict list operations to owner-only filters.
-      allow read, create: if isSignedIn();
+      // Allow authenticated users to read their own logs or admins to read all.
+      // Queries must include a filter on userId to match this rule.
+      allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      
       // Maintenance and auditing restricted to admins
       allow update, delete: if isAdmin();
     }
